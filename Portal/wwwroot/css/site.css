@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --retro-bg: #0a0a1a;
+    --retro-surface: #12122a;
+    --retro-border: #2a2a4a;
+    --neon-cyan: #00ffff;
+    --neon-pink: #ff00ff;
+    --neon-green: #39ff14;
+    --neon-yellow: #ffff00;
+    --neon-blue: #4d4dff;
+    --neon-red: #ff3333;
+    --text-color: #c0c0d0;
+    --text-glow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--retro-bg);
+    color: var(--text-color);
+    margin-bottom: 60px;
+    overflow-x: hidden;
+}
+
+/* CRT scanline overlay */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+}
+
+/* Retro navbar */
+.navbar-retro {
+    background: var(--retro-surface) !important;
+    border-bottom: 2px solid var(--neon-cyan);
+    box-shadow: 0 2px 20px rgba(0, 255, 255, 0.3);
+    padding: 1rem 0;
+}
+
+.navbar-retro .navbar-brand {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.1rem;
+    color: var(--neon-cyan) !important;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 20px rgba(0, 255, 255, 0.4);
+    letter-spacing: 2px;
+}
+
+.navbar-retro .navbar-brand:hover {
+    color: #fff !important;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.9), 0 0 30px rgba(0, 255, 255, 0.6);
+}
+
+/* Override Bootstrap container for dark theme */
+.container {
+    position: relative;
+}
+
+/* Retro headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Press Start 2P', monospace;
+    color: var(--neon-cyan);
+    text-shadow: var(--text-glow);
+}
+
+/* Retro links */
+a {
+    color: var(--neon-cyan);
+}
+
+a:hover {
+    color: #fff;
+    text-shadow: var(--text-glow);
+}
+
+/* Override Bootstrap focus styles */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 255, 0.4);
+}
+
+/* Retro form controls */
+.form-control {
+    background-color: var(--retro-surface);
+    border: 2px solid var(--retro-border);
+    color: var(--neon-cyan);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+}
+
+.form-control:focus {
+    background-color: var(--retro-surface);
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.form-control::placeholder {
+    color: #555;
+}
+
+/* ===== PORTAL SHARED STYLES ===== */
+.retro-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 2.5rem;
+    color: var(--neon-cyan);
+    text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.7),
+        0 0 20px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.3),
+        0 0 80px rgba(0, 255, 255, 0.15);
+    animation: title-glow 2s ease-in-out infinite alternate;
+    letter-spacing: 3px;
+}
+
+@keyframes title-glow {
+    from {
+        text-shadow:
+            0 0 10px rgba(0, 255, 255, 0.7),
+            0 0 20px rgba(0, 255, 255, 0.5),
+            0 0 40px rgba(0, 255, 255, 0.3);
+    }
+    to {
+        text-shadow:
+            0 0 15px rgba(0, 255, 255, 0.9),
+            0 0 30px rgba(0, 255, 255, 0.7),
+            0 0 60px rgba(0, 255, 255, 0.5),
+            0 0 100px rgba(0, 255, 255, 0.2);
+    }
+}
+
+.retro-subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    color: var(--text-color);
+    line-height: 2;
+}
+
+.retro-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    margin: 2rem 0;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}

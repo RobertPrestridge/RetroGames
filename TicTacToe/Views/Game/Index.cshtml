@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Tic Tac Toe";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/TicTacToe/css/game.css" asp-append-version="true" />
+}
+
+<div class="text-center mt-5">
+    <h1 class="retro-title">TIC TAC TOE</h1>
+    <hr class="retro-divider" />
+    <p class="retro-subtitle mt-4">CHALLENGE A FRIEND IN REAL-TIME COMBAT</p>
+    <button id="createGameBtn" class="btn-arcade mt-4">INSERT COIN</button>
+    <p class="retro-subtitle mt-4" style="font-size: 0.5rem; color: #555;">PRESS BUTTON TO START</p>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('createGameBtn').addEventListener('click', async function () {
+            this.disabled = true;
+            this.textContent = 'LOADING...';
+            try {
+                const response = await fetch('/api/tictactoe/games', { method: 'POST' });
+                const data = await response.json();
+                window.location.href = '/tictactoe/game/' + data.shortCode;
+            } catch (err) {
+                alert('Failed to create game. Please try again.');
+                this.disabled = false;
+                this.textContent = 'INSERT COIN';
+            }
+        });
+    </script>
+}

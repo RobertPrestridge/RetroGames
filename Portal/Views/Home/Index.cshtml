@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Game Select";
+}
+
+<div class="text-center mt-5">
+    <h1 class="retro-title">MULTIPLAYER ARCADE</h1>
+    <hr class="retro-divider" />
+    <p class="retro-subtitle mt-4">SELECT YOUR GAME</p>
+
+    <div class="game-select-grid mt-5">
+        <a href="/tictactoe" class="game-card">
+            <div class="game-card-icon">&#10006;&#9898;</div>
+            <div class="game-card-title">TIC TAC TOE</div>
+            <div class="game-card-desc">CLASSIC 2-PLAYER BATTLE</div>
+        </a>
+
+        <a href="/tron" class="game-card game-card-tron">
+            <div class="game-card-icon game-card-icon-tron">&#9655;&#9655;</div>
+            <div class="game-card-title">TRON LIGHT CYCLES</div>
+            <div class="game-card-desc">ENTER THE GRID</div>
+        </a>
+    </div>
+
+    <p class="retro-subtitle mt-5" style="font-size: 0.5rem; color: #555;">SELECT A GAME TO BEGIN</p>
+</div>
+
+@section Styles {
+    <style>
+        .game-select-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 220px;
+            height: 220px;
+            background: var(--retro-surface);
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.05);
+            padding: 1.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            border-color: #fff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 25px rgba(0, 255, 255, 0.1);
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .game-card-locked {
+            border-color: var(--retro-border);
+            box-shadow: none;
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .game-card-locked:hover {
+            border-color: var(--retro-border);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .game-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+
+        .game-card-locked .game-card-icon {
+            color: var(--retro-border);
+            text-shadow: none;
+        }
+
+        .game-card-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--neon-yellow);
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card-locked .game-card-title {
+            color: #555;
+        }
+
+        .game-card-desc {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        .game-card-tron {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 15px rgba(255, 0, 255, 0.05);
+        }
+
+        .game-card-tron:hover {
+            border-color: #fff;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.5), inset 0 0 25px rgba(255, 0, 255, 0.1);
+        }
+
+        .game-card-icon-tron {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+    </style>
+}

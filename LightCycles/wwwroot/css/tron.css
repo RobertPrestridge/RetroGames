@@ -1,0 +1,249 @@
+/* ===== TRON COLOR SCHEME ===== */
+.tron-p1-color { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
+.tron-p2-color { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+
+/* ===== TRON TITLE ===== */
+.tron-title {
+    color: var(--neon-cyan);
+}
+
+.tron-divider {
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+}
+
+/* ===== LOBBY ===== */
+.tron-lobby {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.tron-name-input-group {
+    text-align: left;
+}
+
+.tron-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    color: var(--neon-cyan);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.tron-input {
+    background-color: var(--retro-surface) !important;
+    border: 2px solid var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+}
+
+.tron-input:focus {
+    border-color: #fff !important;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4) !important;
+}
+
+.tron-btn {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.tron-btn:hover {
+    background: rgba(0, 255, 255, 0.1);
+}
+
+/* ===== GAME CONTAINER ===== */
+.tron-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+/* ===== HUD ===== */
+.tron-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 780px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.tron-hud-left,
+.tron-hud-right {
+    flex: 1;
+}
+
+.tron-hud-right {
+    text-align: right;
+}
+
+.tron-hud-center {
+    flex: 2;
+    text-align: center;
+}
+
+.tron-hud-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+}
+
+.tron-hud-status {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+/* ===== CANVAS ===== */
+.tron-canvas-wrapper {
+    position: relative;
+    border: 2px solid var(--neon-cyan);
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.2),
+        inset 0 0 15px rgba(0, 255, 255, 0.05);
+    background: #000;
+    line-height: 0;
+}
+
+#tronCanvas {
+    display: block;
+}
+
+/* ===== COUNTDOWN OVERLAY ===== */
+.tron-countdown-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.tron-countdown-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 4rem;
+    color: var(--neon-yellow);
+    text-shadow:
+        0 0 20px rgba(255, 255, 0, 0.9),
+        0 0 40px rgba(255, 255, 0, 0.6),
+        0 0 80px rgba(255, 255, 0, 0.3);
+    animation: countdown-pulse 0.5s ease-in-out;
+}
+
+@keyframes countdown-pulse {
+    0% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== WAITING OVERLAY ===== */
+.tron-waiting-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10;
+}
+
+.tron-waiting-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    animation: blink-waiting 1.5s ease-in-out infinite;
+}
+
+@keyframes blink-waiting {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.tron-share-box {
+    text-align: center;
+    padding: 1rem;
+    max-width: 450px;
+}
+
+.tron-share-box p {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    color: var(--neon-yellow);
+    margin-bottom: 0.5rem;
+}
+
+.tron-share-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ===== GAME OVER OVERLAY ===== */
+.tron-gameover-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10;
+}
+
+.tron-gameover-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+    animation: gameover-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes gameover-glow {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}
+
+/* ===== CONTROLS HINT ===== */
+.tron-controls-hint {
+    margin-top: 0.75rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.45rem;
+    color: #555;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 780px) {
+    .tron-canvas-wrapper {
+        width: 100%;
+    }
+
+    #tronCanvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .tron-countdown-text {
+        font-size: 2.5rem;
+    }
+
+    .tron-gameover-text {
+        font-size: 0.9rem;
+    }
+
+    .tron-hud-name {
+        font-size: 0.5rem;
+    }
+
+    .tron-hud-status {
+        font-size: 0.45rem;
+    }
+}

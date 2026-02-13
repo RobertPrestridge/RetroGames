@@ -1,0 +1,46 @@
+@model TicTacToe.Models.ViewModels.GameViewModel
+@{
+    ViewData["Title"] = "Game " + Model.ShortCode;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/TicTacToe/css/game.css" asp-append-version="true" />
+}
+
+<div class="text-center game-frame">
+    <div id="status" class="retro-status retro-status-info mt-3">CONNECTING...</div>
+
+    <div id="share-section" class="share-box mb-3 mt-3" style="display:none;">
+        <p>SEND THIS LINK TO YOUR OPPONENT:</p>
+        <div class="input-group mx-auto">
+            <input type="text" id="shareLink" class="form-control" readonly />
+            <button id="copyBtn" class="btn-retro" type="button">COPY</button>
+        </div>
+    </div>
+
+    <div id="turn-indicator" class="turn-indicator mb-3" style="display:none;"></div>
+
+    <div id="board" class="board mx-auto">
+        @for (int i = 0; i < 9; i++)
+        {
+            <div class="cell" data-index="@i"></div>
+        }
+    </div>
+
+    <div id="game-over-section" class="mt-4" style="display:none;">
+        <button id="newGameBtn" class="btn-retro btn-retro-primary">NEW GAME</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        window.gameConfig = {
+            shortCode: '@Model.ShortCode',
+            sessionId: '@ViewBag.SessionId',
+            hubUrl: '/hubs/tictactoe',
+            homePath: '/tictactoe'
+        };
+    </script>
+    <script src="~/_content/TicTacToe/js/game.js" asp-append-version="true"></script>
+}

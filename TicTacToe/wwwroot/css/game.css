@@ -1,0 +1,315 @@
+/* ===== GAME BOARD ===== */
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 120px);
+    grid-template-rows: repeat(3, 120px);
+    gap: 4px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    padding: 4px;
+    width: fit-content;
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.2),
+        inset 0 0 15px rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+}
+
+.cell {
+    background-color: var(--retro-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: default;
+    user-select: none;
+    transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.my-turn .cell:not(.played) {
+    cursor: pointer;
+}
+
+.my-turn .cell:not(.played):hover {
+    background-color: #1a1a3a;
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+/* ===== MARKS ===== */
+.mark-X {
+    color: var(--neon-cyan);
+    text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.8),
+        0 0 20px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.3);
+}
+
+.mark-O {
+    color: var(--neon-pink);
+    text-shadow:
+        0 0 10px rgba(255, 0, 255, 0.8),
+        0 0 20px rgba(255, 0, 255, 0.5),
+        0 0 40px rgba(255, 0, 255, 0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+.cell.played {
+    animation: pop 0.3s ease;
+}
+
+.cell.winning {
+    background-color: rgba(57, 255, 20, 0.1);
+    animation: neon-pulse 0.8s ease infinite alternate;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0.5; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes neon-pulse {
+    from {
+        background-color: rgba(57, 255, 20, 0.05);
+        box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.2);
+    }
+    to {
+        background-color: rgba(57, 255, 20, 0.15);
+        box-shadow: inset 0 0 25px rgba(57, 255, 20, 0.4);
+    }
+}
+
+/* ===== HOME PAGE ===== */
+.retro-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 2.5rem;
+    color: var(--neon-cyan);
+    text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.7),
+        0 0 20px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.3),
+        0 0 80px rgba(0, 255, 255, 0.15);
+    animation: title-glow 2s ease-in-out infinite alternate;
+    letter-spacing: 3px;
+}
+
+@keyframes title-glow {
+    from {
+        text-shadow:
+            0 0 10px rgba(0, 255, 255, 0.7),
+            0 0 20px rgba(0, 255, 255, 0.5),
+            0 0 40px rgba(0, 255, 255, 0.3);
+    }
+    to {
+        text-shadow:
+            0 0 15px rgba(0, 255, 255, 0.9),
+            0 0 30px rgba(0, 255, 255, 0.7),
+            0 0 60px rgba(0, 255, 255, 0.5),
+            0 0 100px rgba(0, 255, 255, 0.2);
+    }
+}
+
+.retro-subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    color: var(--text-color);
+    line-height: 2;
+}
+
+/* INSERT COIN button */
+.btn-arcade {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.85rem;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    color: var(--neon-yellow);
+    border: 3px solid var(--neon-yellow);
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
+    box-shadow:
+        0 0 10px rgba(255, 255, 0, 0.3),
+        inset 0 0 10px rgba(255, 255, 0, 0.1);
+    transition: all 0.2s ease;
+    animation: coin-blink 1.5s ease-in-out infinite;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.btn-arcade:hover {
+    background: rgba(255, 255, 0, 0.1);
+    color: #fff;
+    border-color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    box-shadow:
+        0 0 20px rgba(255, 255, 0, 0.5),
+        inset 0 0 20px rgba(255, 255, 0, 0.15);
+    animation: none;
+    transform: scale(1.05);
+}
+
+.btn-arcade:active {
+    transform: scale(0.98);
+}
+
+.btn-arcade:disabled {
+    animation: none;
+    opacity: 0.5;
+}
+
+@keyframes coin-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* ===== STATUS ALERTS (retro-styled) ===== */
+.retro-status {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0;
+    border: 2px solid;
+    background: var(--retro-surface);
+    line-height: 1.8;
+}
+
+.retro-status-info {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.retro-status-success {
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.retro-status-warning {
+    color: var(--neon-yellow);
+    border-color: var(--neon-yellow);
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
+}
+
+.retro-status-danger {
+    color: var(--neon-red);
+    border-color: var(--neon-red);
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+}
+
+.retro-status-secondary {
+    color: var(--neon-pink);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+}
+
+/* ===== TURN INDICATOR ===== */
+.turn-indicator {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.75rem;
+    line-height: 2;
+}
+
+.turn-yours {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.6);
+    animation: blink-cursor 1s step-end infinite;
+}
+
+.turn-opponent {
+    color: #666;
+}
+
+@keyframes blink-cursor {
+    50% { opacity: 0.6; }
+}
+
+/* ===== SHARE LINK BOX ===== */
+.share-box {
+    border: 2px solid var(--retro-border);
+    background: var(--retro-surface);
+    padding: 1rem;
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+.share-box p {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    color: var(--neon-yellow);
+    margin-bottom: 0.75rem;
+}
+
+.btn-retro {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.btn-retro:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.btn-retro-primary {
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+}
+
+.btn-retro-primary:hover {
+    background: rgba(57, 255, 20, 0.1);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+}
+
+/* ===== GAME OVER ===== */
+.game-over-text {
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* ===== DECORATIVE ELEMENTS ===== */
+.retro-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    margin: 2rem 0;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Pixel art decorative corners for game area */
+.game-frame {
+    position: relative;
+    padding: 2rem 1rem;
+}
+
+.game-frame::before,
+.game-frame::after {
+    content: '+ + + + +';
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: var(--retro-border);
+    letter-spacing: 8px;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 500px) {
+    .board {
+        grid-template-columns: repeat(3, 90px);
+        grid-template-rows: repeat(3, 90px);
+    }
+
+    .cell {
+        font-size: 2rem;
+    }
+
+    .retro-title {
+        font-size: 1.5rem;
+    }
+}

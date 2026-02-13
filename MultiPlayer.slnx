@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Portal/Portal.csproj" />
+  <Project Path="TicTacToe/TicTacToe.csproj" />
+  <Project Path="LightCycles/LightCycles.csproj" />
+</Solution>

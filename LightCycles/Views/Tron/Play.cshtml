@@ -1,0 +1,61 @@
+@model LightCycles.Models.ViewModels.TronPlayViewModel
+@{
+    ViewData["Title"] = "TRON " + Model.ShortCode;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/LightCycles/css/tron.css" asp-append-version="true" />
+}
+
+<div class="tron-game-container">
+    <div class="tron-hud">
+        <div class="tron-hud-left">
+            <span id="p1Name" class="tron-hud-name tron-p1-color">---</span>
+        </div>
+        <div class="tron-hud-center">
+            <span id="gameStatus" class="tron-hud-status">CONNECTING...</span>
+        </div>
+        <div class="tron-hud-right">
+            <span id="p2Name" class="tron-hud-name tron-p2-color">---</span>
+        </div>
+    </div>
+
+    <div class="tron-canvas-wrapper">
+        <canvas id="tronCanvas"></canvas>
+        <div id="countdownOverlay" class="tron-countdown-overlay" style="display:none;">
+            <span id="countdownText" class="tron-countdown-text"></span>
+        </div>
+        <div id="gameOverOverlay" class="tron-gameover-overlay" style="display:none;">
+            <div class="tron-gameover-text" id="gameOverText"></div>
+            <button id="newGameBtn" class="btn-arcade tron-btn mt-4">NEW GAME</button>
+        </div>
+        <div id="waitingOverlay" class="tron-waiting-overlay" style="display:none;">
+            <div class="tron-waiting-text">WAITING FOR OPPONENT...</div>
+            <div class="tron-share-box mt-3">
+                <p>SEND THIS LINK:</p>
+                <div class="tron-share-input-group">
+                    <input type="text" id="shareLink" class="form-control tron-input" readonly />
+                    <button id="copyBtn" class="btn-retro" type="button">COPY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tron-controls-hint">
+        <span>ARROW KEYS / WASD TO STEER</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        window.tronConfig = {
+            shortCode: '@Model.ShortCode',
+            sessionId: '@Model.SessionId',
+            playerName: '@Model.PlayerName',
+            hubUrl: '/hubs/tron',
+            homePath: '/tron'
+        };
+    </script>
+    <script src="~/_content/LightCycles/js/tron.js" asp-append-version="true"></script>
+}

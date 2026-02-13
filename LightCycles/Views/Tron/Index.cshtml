@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "Tron Light Cycles";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/LightCycles/css/tron.css" asp-append-version="true" />
+}
+
+<div class="text-center mt-5">
+    <h1 class="retro-title tron-title">TRON LIGHT CYCLES</h1>
+    <hr class="retro-divider tron-divider" />
+    <p class="retro-subtitle mt-4">ENTER THE GRID. LAST CYCLE STANDING WINS.</p>
+
+    <div class="tron-lobby mt-5">
+        <div class="tron-name-input-group">
+            <label class="tron-label" for="playerName">ENTER YOUR NAME</label>
+            <input type="text" id="playerName" class="form-control tron-input"
+                   maxlength="20" placeholder="PLAYER 1"
+                   value="@ViewBag.PlayerName" autocomplete="off" />
+        </div>
+        <button id="createGameBtn" class="btn-arcade tron-btn mt-4">INSERT COIN</button>
+    </div>
+
+    <p class="retro-subtitle mt-5" style="font-size: 0.5rem; color: #555;">PRESS BUTTON TO START</p>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('createGameBtn').addEventListener('click', async function () {
+            var btn = this;
+            var nameInput = document.getElementById('playerName');
+            var playerName = nameInput.value.trim() || 'PLAYER 1';
+
+            btn.disabled = true;
+            btn.textContent = 'LOADING...';
+
+            try {
+                var response = await fetch('/api/tron/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playerName: playerName })
+                });
+                var data = await response.json();
+                window.location.href = '/tron/game/' + data.shortCode;
+            } catch (err) {
+                alert('Failed to create game. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'INSERT COIN';
+            }
+        });
+
+        document.getElementById('playerName').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('createGameBtn').click();
+            }
+        });
+    </script>
+}
