@@ -1,0 +1,67 @@
+@model Asteroids.Models.ViewModels.AsteroidsPlayViewModel
+@{
+    ViewData["Title"] = "ASTEROIDS " + Model.ShortCode;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/Asteroids/css/asteroids.css" asp-append-version="true" />
+}
+
+<div class="asteroids-game-container">
+    <div class="asteroids-hud">
+        <div class="asteroids-hud-left">
+            <span id="p1Name" class="asteroids-hud-name asteroids-p1-color">---</span>
+            <span id="p1Score" class="asteroids-hud-score asteroids-p1-color">0</span>
+            <span id="p1Lives" class="asteroids-hud-lives"></span>
+        </div>
+        <div class="asteroids-hud-center">
+            <span id="waveText" class="asteroids-hud-wave"></span>
+            <span id="gameStatus" class="asteroids-hud-status">CONNECTING...</span>
+        </div>
+        <div class="asteroids-hud-right">
+            <span id="p2Name" class="asteroids-hud-name asteroids-p2-color">---</span>
+            <span id="p2Score" class="asteroids-hud-score asteroids-p2-color">0</span>
+            <span id="p2Lives" class="asteroids-hud-lives"></span>
+        </div>
+    </div>
+
+    <div class="asteroids-canvas-wrapper">
+        <canvas id="asteroidsCanvas"></canvas>
+        <div id="countdownOverlay" class="asteroids-countdown-overlay" style="display:none;">
+            <span id="countdownText" class="asteroids-countdown-text"></span>
+        </div>
+        <div id="gameOverOverlay" class="asteroids-gameover-overlay" style="display:none;">
+            <div class="asteroids-gameover-text" id="gameOverText"></div>
+            <div class="asteroids-gameover-scores" id="gameOverScores"></div>
+            <button id="newGameBtn" class="btn-arcade asteroids-btn mt-4">NEW GAME</button>
+        </div>
+        <div id="waitingOverlay" class="asteroids-waiting-overlay" style="display:none;">
+            <div class="asteroids-waiting-text">WAITING FOR PLAYER 2...</div>
+            <div class="asteroids-share-box mt-3">
+                <p>SEND THIS LINK:</p>
+                <div class="asteroids-share-input-group">
+                    <input type="text" id="shareLink" class="form-control asteroids-input" readonly />
+                    <button id="copyBtn" class="btn-retro" type="button">COPY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="asteroids-controls-hint">
+        <span>WASD / ARROWS: MOVE &nbsp; SPACE: FIRE</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        window.asteroidsConfig = {
+            shortCode: '@Model.ShortCode',
+            sessionId: '@Model.SessionId',
+            playerName: '@Model.PlayerName',
+            hubUrl: '/hubs/asteroids',
+            homePath: '/asteroids'
+        };
+    </script>
+    <script src="~/_content/Asteroids/js/asteroids.js" asp-append-version="true"></script>
+}

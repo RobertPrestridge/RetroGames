@@ -29,6 +29,12 @@
             <div class="game-card-title">TRON LIGHT CYCLES</div>
             <div class="game-card-desc">ENTER THE GRID</div>
         </a>
+
+        <a href="/asteroids" class="game-card game-card-asteroids">
+            <div class="game-card-icon game-card-icon-asteroids">&#9788;&#10026;</div>
+            <div class="game-card-title">ASTEROIDS</div>
+            <div class="game-card-desc">DESTROY THE ROCKS</div>
+        </a>
     </div>
 
     <p class="retro-subtitle mt-5" style="font-size: 0.5rem; color: #555;">SELECT A GAME TO BEGIN</p>
@@ -135,6 +141,21 @@
         .game-card-icon-tron {
             color: var(--neon-pink);
             text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+
+        .game-card-asteroids {
+            border-color: #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3), inset 0 0 15px rgba(0, 255, 65, 0.05);
+        }
+
+        .game-card-asteroids:hover {
+            border-color: #fff;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.5), inset 0 0 25px rgba(0, 255, 65, 0.1);
+        }
+
+        .game-card-icon-asteroids {
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
         }
 
         /* Background scene visibility */
