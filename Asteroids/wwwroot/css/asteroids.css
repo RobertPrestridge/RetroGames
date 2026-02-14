@@ -1,0 +1,278 @@
+/* Asteroids Game Styles - Green/Lime neon theme */
+
+.asteroids-title {
+    color: #00ff41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.7), 0 0 30px rgba(0, 255, 65, 0.3);
+}
+
+.asteroids-divider {
+    border-color: #00ff41;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}
+
+/* Lobby */
+.asteroids-lobby {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.asteroids-name-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.asteroids-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    color: #00ff41;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+.asteroids-input {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    background: rgba(0, 255, 65, 0.05);
+    border: 2px solid #00ff41;
+    color: #00ff41;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    width: 280px;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.2);
+}
+
+.asteroids-input:focus {
+    outline: none;
+    border-color: #66ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+    background: rgba(0, 255, 65, 0.08);
+    color: #66ff88;
+}
+
+.asteroids-input::placeholder {
+    color: rgba(0, 255, 65, 0.3);
+}
+
+.asteroids-btn {
+    border-color: #00ff41;
+    color: #00ff41;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.asteroids-btn:hover {
+    border-color: #66ff88;
+    color: #66ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+/* Game Container */
+.asteroids-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* HUD */
+.asteroids-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0.5rem 1rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+}
+
+.asteroids-hud-left,
+.asteroids-hud-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 150px;
+}
+
+.asteroids-hud-right {
+    text-align: right;
+    align-items: flex-end;
+}
+
+.asteroids-hud-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.asteroids-hud-name {
+    font-size: 0.5rem;
+}
+
+.asteroids-hud-score {
+    font-size: 0.7rem;
+}
+
+.asteroids-hud-lives {
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+}
+
+.asteroids-hud-wave {
+    font-size: 0.5rem;
+    color: #aaa;
+}
+
+.asteroids-hud-status {
+    font-size: 0.5rem;
+    color: #00ff41;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+.asteroids-p1-color {
+    color: #00ff41;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+.asteroids-p2-color {
+    color: #ff8800;
+    text-shadow: 0 0 6px rgba(255, 136, 0, 0.5);
+}
+
+/* Canvas */
+.asteroids-canvas-wrapper {
+    position: relative;
+    border: 2px solid #00ff41;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3), inset 0 0 15px rgba(0, 255, 65, 0.05);
+    margin: 0.5rem 0;
+    line-height: 0;
+}
+
+#asteroidsCanvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Overlays */
+.asteroids-countdown-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.asteroids-countdown-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 4rem;
+    color: #00ff41;
+    text-shadow: 0 0 30px rgba(0, 255, 65, 0.8), 0 0 60px rgba(0, 255, 65, 0.4);
+    animation: asteroids-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes asteroids-pulse {
+    from { transform: scale(1); opacity: 1; }
+    to   { transform: scale(1.1); opacity: 0.8; }
+}
+
+.asteroids-gameover-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+}
+
+.asteroids-gameover-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.5rem;
+    color: #00ff41;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+    margin-bottom: 1rem;
+}
+
+.asteroids-gameover-scores {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    color: #ccc;
+    text-align: center;
+    line-height: 2;
+}
+
+.asteroids-waiting-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.asteroids-waiting-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    color: #00ff41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+    animation: asteroids-blink 1s step-end infinite;
+}
+
+@keyframes asteroids-blink {
+    50% { opacity: 0; }
+}
+
+.asteroids-share-box {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.45rem;
+    color: #888;
+}
+
+.asteroids-share-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.asteroids-share-input-group .asteroids-input {
+    font-size: 0.5rem;
+    width: 350px;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Controls hint */
+.asteroids-controls-hint {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #555;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .asteroids-hud {
+        font-size: 0.4rem;
+    }
+
+    .asteroids-hud-score {
+        font-size: 0.55rem;
+    }
+
+    .asteroids-canvas-wrapper {
+        width: 100%;
+    }
+
+    .asteroids-share-input-group .asteroids-input {
+        width: 200px;
+    }
+}

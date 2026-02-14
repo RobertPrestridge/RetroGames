@@ -1,5 +1,6 @@
 using TicTacToe;
 using LightCycles;
+using Asteroids;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddSignalR();
 // Register game services
 builder.Services.AddTicTacToe(builder.Configuration);
 builder.Services.AddLightCycles(builder.Configuration);
+builder.Services.AddAsteroids(builder.Configuration);
 
 var app = builder.Build();
 
@@ -32,5 +34,6 @@ app.MapControllerRoute(
 // Map game hubs + endpoints
 app.MapTicTacToe();
 app.MapLightCycles();
+app.MapAsteroids();
 
 app.Run();
