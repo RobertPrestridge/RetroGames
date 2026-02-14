@@ -1,0 +1,164 @@
+@* Background 4: Canvas Pixel City — HTML5 Canvas with animated neon tubes *@
+<div class="bg-scene bg-pixel-city" id="bgPixelCity">
+    <canvas id="pixelCityCanvas"></canvas>
+</div>
+
+<style>
+    .bg-pixel-city {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    #pixelCityCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+</style>
+
+<script>
+    (function() {
+        var canvas = document.getElementById('pixelCityCanvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var W, H;
+        var buildings = [];
+        var neonTubes = [];
+        var stars = [];
+
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            init();
+        }
+
+        function init() {
+            buildings = [];
+            neonTubes = [];
+            stars = [];
+
+            // Stars
+            for (var i = 0; i < 80; i++) {
+                stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H * 0.5,
+                    r: 0.5 + Math.random(),
+                    a: 0.3 + Math.random() * 0.5,
+                    twinkleSpeed: 0.005 + Math.random() * 0.015
+                });
+            }
+
+            // Buildings
+            var x = 0;
+            while (x < W + 150) {
+                var bw = 40 + Math.random() * 100;
+                var bh = H * (0.15 + Math.random() * 0.35);
+                buildings.push({ x: x, w: bw, h: bh });
+
+                // Neon tube on some buildings
+                if (Math.random() > 0.35) {
+                    var colors = ['#00ffff', '#ff00ff', '#ffff00', '#39ff14'];
+                    var color = colors[Math.floor(Math.random() * colors.length)];
+                    var tubeY = H - bh + 10 + Math.random() * (bh * 0.4);
+                    var tubeW = bw * (0.3 + Math.random() * 0.4);
+                    var tubeX = x + (bw - tubeW) / 2;
+                    neonTubes.push({
+                        x: tubeX, y: tubeY, w: tubeW,
+                        color: color,
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.02 + Math.random() * 0.03,
+                        drawProgress: 0,
+                        drawSpeed: 0.005 + Math.random() * 0.01,
+                        drawn: false,
+                        flickerTimer: 0,
+                        flickering: false
+                    });
+                }
+                x += bw + 2;
+            }
+        }
+
+        var time = 0;
+
+        function draw() {
+            time++;
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, W, H);
+
+            // Gradient sky
+            var grad = ctx.createLinearGradient(0, 0, 0, H * 0.6);
+            grad.addColorStop(0, '#050510');
+            grad.addColorStop(1, '#0a0a2e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H * 0.6);
+
+            // Stars
+            for (var i = 0; i < stars.length; i++) {
+                var s = stars[i];
+                var alpha = s.a + Math.sin(time * s.twinkleSpeed) * 0.2;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,' + Math.max(0.1, alpha) + ')';
+                ctx.fill();
+            }
+
+            // Buildings
+            for (var j = 0; j < buildings.length; j++) {
+                var b = buildings[j];
+                ctx.fillStyle = '#08081a';
+                ctx.fillRect(b.x, H - b.h, b.w, b.h);
+                ctx.strokeStyle = 'rgba(0,255,255,0.1)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, H - b.h, b.w, 1);
+            }
+
+            // Neon tubes
+            for (var k = 0; k < neonTubes.length; k++) {
+                var t = neonTubes[k];
+
+                // Draw progress animation
+                if (!t.drawn) {
+                    t.drawProgress = Math.min(1, t.drawProgress + t.drawSpeed);
+                    if (t.drawProgress >= 1) t.drawn = true;
+                }
+
+                // Random flicker
+                if (t.drawn && !t.flickering && Math.random() < 0.001) {
+                    t.flickering = true;
+                    t.flickerTimer = 8 + Math.floor(Math.random() * 15);
+                }
+                if (t.flickering) {
+                    t.flickerTimer--;
+                    if (t.flickerTimer <= 0) t.flickering = false;
+                }
+
+                var flicker = t.flickering && (t.flickerTimer % 3 === 0);
+                var pulse = 0.6 + Math.sin(time * t.speed + t.phase) * 0.4;
+                var currentW = t.w * t.drawProgress;
+
+                if (!flicker) {
+                    // Glow
+                    ctx.shadowColor = t.color;
+                    ctx.shadowBlur = 12 * pulse;
+                    ctx.strokeStyle = t.color;
+                    ctx.globalAlpha = pulse * 0.9;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(t.x, t.y);
+                    ctx.lineTo(t.x + currentW, t.y);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
+    })();
+</script>
