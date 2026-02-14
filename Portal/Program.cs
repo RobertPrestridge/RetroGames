@@ -1,6 +1,7 @@
 using TicTacToe;
 using LightCycles;
 using Asteroids;
+using PocketTanks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddSignalR();
 builder.Services.AddTicTacToe(builder.Configuration);
 builder.Services.AddLightCycles(builder.Configuration);
 builder.Services.AddAsteroids(builder.Configuration);
+builder.Services.AddPocketTanks(builder.Configuration);
 
 var app = builder.Build();
 
@@ -35,5 +37,6 @@ app.MapControllerRoute(
 app.MapTicTacToe();
 app.MapLightCycles();
 app.MapAsteroids();
+app.MapPocketTanks();
 
 app.Run();

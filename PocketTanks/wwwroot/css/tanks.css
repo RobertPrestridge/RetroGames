@@ -1,0 +1,509 @@
+/* ===== TANKS COLOR SCHEME ===== */
+.tanks-p1-color { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
+.tanks-p2-color { color: #ff00ff; text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+
+/* ===== TANKS TITLE ===== */
+.tanks-title {
+    color: #ff8800;
+}
+
+.tanks-divider {
+    background: linear-gradient(90deg, transparent, #ff8800, #ffaa00, transparent);
+}
+
+/* ===== LOBBY ===== */
+.tanks-lobby {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.tanks-name-input-group {
+    text-align: left;
+}
+
+.tanks-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    color: #ff8800;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.tanks-input {
+    background-color: var(--retro-surface) !important;
+    border: 2px solid #ff8800 !important;
+    color: #ff8800 !important;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+}
+
+.tanks-input:focus {
+    border-color: #fff !important;
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.4) !important;
+}
+
+.tanks-btn {
+    border-color: #ff8800;
+    color: #ff8800;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.7);
+    box-shadow: 0 0 10px rgba(255, 136, 0, 0.3), inset 0 0 10px rgba(255, 136, 0, 0.1);
+}
+
+.tanks-btn:hover {
+    background: rgba(255, 136, 0, 0.1);
+}
+
+/* ===== GAME CONTAINER ===== */
+.tanks-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+/* ===== HUD ===== */
+.tanks-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.tanks-hud-left,
+.tanks-hud-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.tanks-hud-right {
+    text-align: right;
+    align-items: flex-end;
+}
+
+.tanks-hud-left {
+    align-items: flex-start;
+}
+
+.tanks-hud-center {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+.tanks-hud-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+}
+
+.tanks-hud-status {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    color: #ffaa00;
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.tanks-hud-turn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #888;
+}
+
+.tanks-hud-timer {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    color: #ffaa00;
+}
+
+.tanks-hud-health {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #aaa;
+}
+
+.tanks-hud-score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #ffaa00;
+}
+
+/* Health bars */
+.tanks-health-bar-wrapper {
+    width: 120px;
+    height: 8px;
+    background: #1a1a2e;
+    border: 1px solid #333;
+}
+
+.tanks-health-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+/* ===== CANVAS ===== */
+.tanks-canvas-wrapper {
+    position: relative;
+    border: 2px solid #ff8800;
+    box-shadow:
+        0 0 15px rgba(255, 136, 0, 0.4),
+        0 0 30px rgba(255, 136, 0, 0.2),
+        inset 0 0 15px rgba(255, 136, 0, 0.05);
+    background: #000;
+    line-height: 0;
+}
+
+#tanksCanvas {
+    display: block;
+}
+
+/* ===== OVERLAYS ===== */
+.tanks-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.tanks-waiting-overlay {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.tanks-waiting-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    color: #ff8800;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.7);
+    animation: tanks-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes tanks-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.tanks-share-box {
+    text-align: center;
+    padding: 1rem;
+    max-width: 450px;
+}
+
+.tanks-share-box p {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    color: #ffaa00;
+    margin-bottom: 0.5rem;
+}
+
+.tanks-share-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Countdown */
+.tanks-countdown-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.tanks-countdown-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 4rem;
+    color: #ffaa00;
+    text-shadow:
+        0 0 20px rgba(255, 170, 0, 0.9),
+        0 0 40px rgba(255, 170, 0, 0.6),
+        0 0 80px rgba(255, 136, 0, 0.3);
+    animation: countdown-pulse 0.5s ease-in-out;
+}
+
+@keyframes countdown-pulse {
+    0% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Weapon select */
+.tanks-weapon-overlay {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.tanks-weapon-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    color: #ffaa00;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.7);
+}
+
+.tanks-weapon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    max-width: 600px;
+}
+
+.tanks-weapon-card {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.45rem;
+    padding: 0.6rem 0.8rem;
+    background: rgba(18, 18, 42, 0.9);
+    border: 2px solid #ff8800;
+    color: #ffaa00;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 100px;
+    text-align: center;
+}
+
+.tanks-weapon-card:hover {
+    border-color: #fff;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+    transform: scale(1.05);
+}
+
+.tanks-weapon-card.selected {
+    border-color: #ffaa00;
+    box-shadow: 0 0 15px rgba(255, 170, 0, 0.6), inset 0 0 10px rgba(255, 170, 0, 0.1);
+}
+
+.tanks-weapon-card.used {
+    opacity: 0.3;
+    cursor: default;
+    text-decoration: line-through;
+}
+
+/* Game over */
+.tanks-gameover-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.tanks-gameover-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.5rem;
+    color: #ffaa00;
+    text-shadow:
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+    animation: tanks-glow 1s ease-in-out infinite alternate;
+}
+
+.tanks-gameover-scores {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    margin-top: 1rem;
+    color: #aaa;
+}
+
+@keyframes tanks-glow {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}
+
+/* ===== CONTROLS ===== */
+.tanks-controls {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.tanks-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.tanks-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tanks-control-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #888;
+}
+
+.tanks-control-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    color: #ffaa00;
+    min-width: 40px;
+    text-align: center;
+}
+
+.tanks-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 200px;
+    height: 6px;
+    background: #1a1a2e;
+    border: 1px solid #ff8800;
+    outline: none;
+    cursor: pointer;
+}
+
+.tanks-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #ff8800;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.5);
+}
+
+.tanks-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #ff8800;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.5);
+}
+
+.tanks-slider:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.tanks-fire-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    padding: 0.8rem 2rem;
+    background: transparent;
+    border: 3px solid #ff4400;
+    color: #ff4400;
+    cursor: pointer;
+    text-shadow: 0 0 10px rgba(255, 68, 0, 0.7);
+    box-shadow: 0 0 10px rgba(255, 68, 0, 0.3);
+    transition: all 0.15s ease;
+}
+
+.tanks-fire-btn.active {
+    animation: tanks-fire-pulse 1.5s ease-in-out infinite;
+}
+
+.tanks-fire-btn.active:hover {
+    background: rgba(255, 68, 0, 0.15);
+    box-shadow: 0 0 20px rgba(255, 68, 0, 0.5);
+    transform: scale(1.05);
+}
+
+.tanks-fire-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    animation: none;
+}
+
+@keyframes tanks-fire-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 68, 0, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(255, 68, 0, 0.6), 0 0 50px rgba(255, 68, 0, 0.2); }
+}
+
+.tanks-weapon-info {
+    text-align: center;
+    margin-top: 0.4rem;
+}
+
+.tanks-current-weapon {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.45rem;
+    color: #ffaa00;
+    text-shadow: 0 0 8px rgba(255, 170, 0, 0.5);
+}
+
+.tanks-change-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    margin-left: 0.5rem;
+    background: transparent;
+    border: 2px solid #ff8800;
+    color: #ff8800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    vertical-align: middle;
+}
+
+.tanks-change-btn:hover {
+    border-color: #fff;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+}
+
+/* ===== CONTROLS HINT ===== */
+.tanks-controls-hint {
+    margin-top: 0.5rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.35rem;
+    color: #555;
+    text-align: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1220px) {
+    .tanks-canvas-wrapper {
+        width: 100%;
+    }
+
+    #tanksCanvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .tanks-countdown-text {
+        font-size: 2.5rem;
+    }
+
+    .tanks-gameover-text {
+        font-size: 1rem;
+    }
+
+    .tanks-hud-name {
+        font-size: 0.45rem;
+    }
+
+    .tanks-hud-status {
+        font-size: 0.4rem;
+    }
+
+    .tanks-slider {
+        width: 140px;
+    }
+}
+
+@media (max-width: 600px) {
+    .tanks-controls-row {
+        gap: 1rem;
+    }
+
+    .tanks-slider {
+        width: 100px;
+    }
+
+    .tanks-fire-btn {
+        font-size: 0.5rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .tanks-controls-hint {
+        font-size: 0.25rem;
+    }
+}
