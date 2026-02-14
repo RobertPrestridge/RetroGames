@@ -2,7 +2,16 @@
     ViewData["Title"] = "Game Select";
 }
 
-<div class="text-center mt-5">
+@* Background partial views — rendered behind main content *@
+<div id="bgContainer">
+    @await Html.PartialAsync("_BgNeonSkyline")
+    @await Html.PartialAsync("_BgNeonRain")
+    @await Html.PartialAsync("_BgMarqueeCity")
+    @await Html.PartialAsync("_BgPixelCity")
+    @await Html.PartialAsync("_BgFloatingGeometry")
+</div>
+
+<div class="text-center mt-5 portal-content">
     <h1 class="retro-title">MULTIPLAYER ARCADE</h1>
     <hr class="retro-divider" />
     <p class="retro-subtitle mt-4">SELECT YOUR GAME</p>
@@ -24,8 +33,21 @@
     <p class="retro-subtitle mt-5" style="font-size: 0.5rem; color: #555;">SELECT A GAME TO BEGIN</p>
 </div>
 
+@* Background switcher button *@
+<div class="bg-switcher">
+    <button id="bgSwitchBtn" class="bg-switch-btn" title="Change Background">
+        <span class="bg-switch-icon">&#9670;</span>
+        <span class="bg-switch-label" id="bgSwitchLabel">SKYLINE</span>
+    </button>
+</div>
+
 @section Styles {
     <style>
+        .portal-content {
+            position: relative;
+            z-index: 1;
+        }
+
         .game-select-grid {
             display: flex;
             justify-content: center;
@@ -40,12 +62,13 @@
             justify-content: center;
             width: 220px;
             height: 220px;
-            background: var(--retro-surface);
+            background: rgba(18, 18, 42, 0.85);
             border: 3px solid var(--neon-cyan);
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.05);
             padding: 1.5rem;
             text-decoration: none;
             transition: all 0.2s ease;
+            backdrop-filter: blur(2px);
         }
 
         .game-card:hover {
@@ -112,5 +135,107 @@
             color: var(--neon-pink);
             text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
         }
+
+        /* Background scene visibility */
+        .bg-scene {
+            display: none;
+        }
+        .bg-scene.active {
+            display: block;
+        }
+
+        /* Background switcher button */
+        .bg-switcher {
+            position: fixed;
+            bottom: 1.2rem;
+            right: 1.2rem;
+            z-index: 100;
+        }
+
+        .bg-switch-btn {
+            background: rgba(18, 18, 42, 0.9);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            color: var(--neon-cyan);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4rem;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .bg-switch-btn:hover {
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .bg-switch-icon {
+            font-size: 0.6rem;
+            animation: icon-spin 4s linear infinite;
+        }
+
+        @@keyframes icon-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        @@media (max-width: 576px) {
+            .bg-switch-btn {
+                font-size: 0.3rem;
+                padding: 0.4rem 0.6rem;
+            }
+        }
     </style>
+}
+
+@section Scripts {
+    <script>
+        (function() {
+            var scenes = [
+                { id: 'bgNeonSkyline',      label: 'SKYLINE' },
+                { id: 'bgNeonRain',          label: 'RAIN' },
+                { id: 'bgMarqueeCity',       label: 'MARQUEE' },
+                { id: 'bgPixelCity',         label: 'PIXEL' },
+                { id: 'bgFloatingGeometry',  label: 'GEOMETRY' }
+            ];
+
+            var storageKey = 'arcadeBgIndex';
+            var current = parseInt(localStorage.getItem(storageKey)) || 0;
+            if (current < 0 || current >= scenes.length) current = 0;
+
+            var btn = document.getElementById('bgSwitchBtn');
+            var label = document.getElementById('bgSwitchLabel');
+
+            function showScene(index) {
+                for (var i = 0; i < scenes.length; i++) {
+                    var el = document.getElementById(scenes[i].id);
+                    if (el) {
+                        if (i === index) {
+                            el.classList.add('active');
+                        } else {
+                            el.classList.remove('active');
+                        }
+                    }
+                }
+                if (label) label.textContent = scenes[index].label;
+                localStorage.setItem(storageKey, index);
+            }
+
+            // Show initial scene
+            showScene(current);
+
+            // Cycle on click
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    current = (current + 1) % scenes.length;
+                    showScene(current);
+                });
+            }
+        })();
+    </script>
 }

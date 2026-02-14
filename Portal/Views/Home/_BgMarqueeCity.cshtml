@@ -1,0 +1,111 @@
+@* Background 3: Scrolling Marquee City — CSS animations *@
+<div class="bg-scene bg-marquee-city" id="bgMarqueeCity">
+    <div class="marquee-sky"></div>
+    <div class="marquee-track">
+        <div class="marquee-strip">
+            <div class="marquee-building mb1"><div class="marquee-label lbl-cyan">ARCADE</div></div>
+            <div class="marquee-building mb2"><div class="marquee-label lbl-pink">TOKENS</div></div>
+            <div class="marquee-building mb3"></div>
+            <div class="marquee-building mb4"><div class="marquee-label lbl-yellow">PIZZA</div></div>
+            <div class="marquee-building mb5"><div class="marquee-label lbl-cyan">HIGH SCORE</div></div>
+            <div class="marquee-building mb6"></div>
+            <div class="marquee-building mb7"><div class="marquee-label lbl-pink">NEON</div></div>
+            <div class="marquee-building mb8"><div class="marquee-label lbl-yellow">OPEN</div></div>
+            <!-- duplicate for seamless loop -->
+            <div class="marquee-building mb1"><div class="marquee-label lbl-cyan">ARCADE</div></div>
+            <div class="marquee-building mb2"><div class="marquee-label lbl-pink">TOKENS</div></div>
+            <div class="marquee-building mb3"></div>
+            <div class="marquee-building mb4"><div class="marquee-label lbl-yellow">PIZZA</div></div>
+            <div class="marquee-building mb5"><div class="marquee-label lbl-cyan">HIGH SCORE</div></div>
+            <div class="marquee-building mb6"></div>
+            <div class="marquee-building mb7"><div class="marquee-label lbl-pink">NEON</div></div>
+            <div class="marquee-building mb8"><div class="marquee-label lbl-yellow">OPEN</div></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-marquee-city {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        background: linear-gradient(180deg, #060618 0%, #0a0a2e 50%, #0d0d20 100%);
+    }
+
+    .marquee-sky {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 50%;
+        background-image:
+            radial-gradient(1px 1px at 12% 20%, rgba(255,255,255,0.5), transparent),
+            radial-gradient(1px 1px at 35% 10%, rgba(255,255,255,0.4), transparent),
+            radial-gradient(1px 1px at 55% 30%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.5), transparent),
+            radial-gradient(1px 1px at 92% 40%, rgba(255,255,255,0.4), transparent);
+    }
+
+    .marquee-track {
+        position: absolute;
+        bottom: 0; left: 0; width: 100%; height: 40%;
+        overflow: hidden;
+    }
+
+    .marquee-strip {
+        display: flex;
+        align-items: flex-end;
+        height: 100%;
+        animation: marquee-scroll 30s linear infinite;
+        width: max-content;
+    }
+
+    .marquee-building {
+        background: #08081a;
+        border-top: 2px solid rgba(0,255,255,0.12);
+        border-right: 1px solid rgba(0,255,255,0.06);
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .mb1 { width: 120px; height: 60%; }
+    .mb2 { width: 90px;  height: 80%; }
+    .mb3 { width: 70px;  height: 45%; }
+    .mb4 { width: 140px; height: 70%; }
+    .mb5 { width: 100px; height: 90%; }
+    .mb6 { width: 60px;  height: 40%; }
+    .mb7 { width: 110px; height: 75%; }
+    .mb8 { width: 80px;  height: 55%; }
+
+    .marquee-label {
+        position: absolute;
+        top: 12%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.3rem;
+        white-space: nowrap;
+        letter-spacing: 1px;
+    }
+
+    .marquee-label.lbl-cyan {
+        color: var(--neon-cyan);
+        text-shadow: 0 0 5px var(--neon-cyan), 0 0 15px rgba(0,255,255,0.4);
+    }
+    .marquee-label.lbl-pink {
+        color: var(--neon-pink);
+        text-shadow: 0 0 5px var(--neon-pink), 0 0 15px rgba(255,0,255,0.4);
+    }
+    .marquee-label.lbl-yellow {
+        color: var(--neon-yellow);
+        text-shadow: 0 0 5px var(--neon-yellow), 0 0 15px rgba(255,255,0,0.4);
+    }
+
+    @@keyframes marquee-scroll {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    @@media (max-width: 576px) {
+        .marquee-track { height: 30%; }
+        .marquee-label { font-size: 0.2rem; }
+    }
+</style>

@@ -1,0 +1,79 @@
+@* Background 2: Raining Neon Reflections — CSS + minimal JS *@
+<div class="bg-scene bg-neon-rain" id="bgNeonRain">
+    <div class="rain-container" id="rainContainer"></div>
+    <div class="rain-ground"></div>
+</div>
+
+<style>
+    .bg-neon-rain {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        background: linear-gradient(180deg, #030312 0%, #0a0a2a 60%, #0c1025 100%);
+    }
+
+    .rain-container {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    .rain-drop {
+        position: absolute;
+        top: -10%;
+        width: 1px;
+        border-radius: 0 0 1px 1px;
+        animation: rain-fall linear infinite;
+    }
+
+    .rain-drop.cyan {
+        background: linear-gradient(180deg, transparent, var(--neon-cyan));
+        box-shadow: 0 0 3px var(--neon-cyan);
+    }
+
+    .rain-drop.pink {
+        background: linear-gradient(180deg, transparent, var(--neon-pink));
+        box-shadow: 0 0 3px var(--neon-pink);
+    }
+
+    .rain-drop.blue {
+        background: linear-gradient(180deg, transparent, rgba(77,77,255,0.8));
+        box-shadow: 0 0 3px rgba(77,77,255,0.5);
+    }
+
+    .rain-ground {
+        position: absolute;
+        bottom: 0; left: 0; width: 100%; height: 15%;
+        background: linear-gradient(180deg, transparent, rgba(0,255,255,0.03) 50%, rgba(255,0,255,0.02));
+    }
+
+    @@keyframes rain-fall {
+        0% { transform: translateY(-10vh); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 0.7; }
+        100% { transform: translateY(110vh); opacity: 0; }
+    }
+
+    @@media (max-width: 576px) {
+        .rain-ground { height: 10%; }
+    }
+</style>
+
+<script>
+    (function() {
+        var container = document.getElementById('rainContainer');
+        if (!container) return;
+        var colors = ['cyan', 'pink', 'blue'];
+        var dropCount = Math.min(60, Math.floor(window.innerWidth / 20));
+        for (var i = 0; i < dropCount; i++) {
+            var drop = document.createElement('div');
+            drop.className = 'rain-drop ' + colors[i % 3];
+            drop.style.left = (Math.random() * 100) + '%';
+            drop.style.height = (15 + Math.random() * 25) + 'px';
+            drop.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+            drop.style.animationDelay = (Math.random() * 3) + 's';
+            drop.style.opacity = 0.3 + Math.random() * 0.5;
+            container.appendChild(drop);
+        }
+    })();
+</script>

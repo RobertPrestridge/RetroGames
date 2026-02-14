@@ -1,0 +1,125 @@
+@* Background 5: Floating Neon Geometry — CSS animated shapes *@
+<div class="bg-scene bg-floating-geo" id="bgFloatingGeometry">
+    <div class="geo-shape geo-diamond s1"></div>
+    <div class="geo-shape geo-circle s2"></div>
+    <div class="geo-shape geo-triangle s3"></div>
+    <div class="geo-shape geo-diamond s4"></div>
+    <div class="geo-shape geo-circle s5"></div>
+    <div class="geo-shape geo-triangle s6"></div>
+    <div class="geo-shape geo-diamond s7"></div>
+    <div class="geo-shape geo-circle s8"></div>
+    <div class="geo-shape geo-cross s9"></div>
+    <div class="geo-shape geo-diamond s10"></div>
+    <div class="geo-shape geo-cross s11"></div>
+    <div class="geo-shape geo-triangle s12"></div>
+</div>
+
+<style>
+    .bg-floating-geo {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        background: linear-gradient(180deg, #050510 0%, #0a0a2e 50%, #080820 100%);
+    }
+
+    .geo-shape {
+        position: absolute;
+        opacity: 0;
+        animation: geo-float linear infinite;
+    }
+
+    /* Diamond */
+    .geo-diamond {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--neon-cyan);
+        transform: rotate(45deg);
+        box-shadow: 0 0 8px var(--neon-cyan), inset 0 0 4px rgba(0,255,255,0.2);
+    }
+
+    /* Circle */
+    .geo-circle {
+        width: 22px;
+        height: 22px;
+        border: 2px solid var(--neon-pink);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--neon-pink), inset 0 0 4px rgba(255,0,255,0.2);
+    }
+
+    /* Triangle */
+    .geo-triangle {
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-bottom-color: var(--neon-yellow);
+        filter: drop-shadow(0 0 6px var(--neon-yellow));
+    }
+
+    /* Cross */
+    .geo-cross {
+        width: 18px;
+        height: 18px;
+        position: absolute;
+    }
+    .geo-cross::before,
+    .geo-cross::after {
+        content: '';
+        position: absolute;
+        background: var(--neon-green);
+        box-shadow: 0 0 6px var(--neon-green);
+    }
+    .geo-cross::before {
+        width: 2px; height: 100%;
+        left: 50%; transform: translateX(-50%);
+    }
+    .geo-cross::after {
+        height: 2px; width: 100%;
+        top: 50%; transform: translateY(-50%);
+    }
+
+    /* Individual positions and timing */
+    .s1  { left: 5%;  animation-duration: 12s; animation-delay: 0s; }
+    .s2  { left: 15%; animation-duration: 14s; animation-delay: 1s; }
+    .s3  { left: 25%; animation-duration: 10s; animation-delay: 3s; }
+    .s4  { left: 35%; animation-duration: 16s; animation-delay: 2s; }
+    .s5  { left: 45%; animation-duration: 11s; animation-delay: 4s; }
+    .s6  { left: 55%; animation-duration: 13s; animation-delay: 1.5s; }
+    .s7  { left: 65%; animation-duration: 15s; animation-delay: 0.5s; }
+    .s8  { left: 75%; animation-duration: 10s; animation-delay: 3.5s; }
+    .s9  { left: 82%; animation-duration: 14s; animation-delay: 2.5s; }
+    .s10 { left: 90%; animation-duration: 12s; animation-delay: 5s; }
+    .s11 { left: 50%; animation-duration: 16s; animation-delay: 6s; }
+    .s12 { left: 8%;  animation-duration: 13s; animation-delay: 7s; }
+
+    @@keyframes geo-float {
+        0% {
+            bottom: -5%;
+            opacity: 0;
+            transform: rotate(0deg) scale(0.5);
+        }
+        10% {
+            opacity: 0.4;
+        }
+        50% {
+            opacity: 0.25;
+            transform: rotate(180deg) scale(1);
+        }
+        90% {
+            opacity: 0.15;
+        }
+        100% {
+            bottom: 105%;
+            opacity: 0;
+            transform: rotate(360deg) scale(0.7);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .geo-diamond { width: 14px; height: 14px; }
+        .geo-circle  { width: 16px; height: 16px; }
+        .geo-cross   { width: 12px; height: 12px; }
+    }
+</style>
