@@ -1,0 +1,783 @@
+@* Background 6: Neon Alley — Rain-soaked Asian alleyway at night with neon signs *@
+<div class="bg-scene bg-neon-alley" id="bgNeonAlley">
+    <canvas id="neonAlleyCanvas"></canvas>
+</div>
+
+<style>
+    .bg-neon-alley {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    #neonAlleyCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+</style>
+
+<script>
+    (function() {
+        var canvas = document.getElementById('neonAlleyCanvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var W, H;
+
+        // Pixel font: 5x7 bitmap (reused from Pixel City pattern)
+        var PIXEL_FONT = {
+            'A': [14,17,17,31,17,17,17],
+            'B': [30,17,17,30,17,17,30],
+            'C': [14,17,16,16,16,17,14],
+            'D': [30,17,17,17,17,17,30],
+            'E': [31,16,16,30,16,16,31],
+            'F': [31,16,16,30,16,16,16],
+            'G': [14,17,16,23,17,17,14],
+            'H': [17,17,17,31,17,17,17],
+            'I': [14,4,4,4,4,4,14],
+            'K': [17,18,20,24,20,18,17],
+            'L': [16,16,16,16,16,16,31],
+            'M': [17,27,21,17,17,17,17],
+            'N': [17,25,21,19,17,17,17],
+            'O': [14,17,17,17,17,17,14],
+            'P': [30,17,17,30,16,16,16],
+            'R': [30,17,17,30,20,18,17],
+            'S': [14,17,16,14,1,17,14],
+            'T': [31,4,4,4,4,4,4],
+            'U': [17,17,17,17,17,17,14],
+            'Y': [17,17,10,4,4,4,4],
+            '2': [14,17,1,2,4,8,31],
+            '4': [2,6,10,18,31,2,2],
+            '7': [31,1,2,4,4,4,4],
+            '/': [1,1,2,4,8,16,16]
+        };
+
+        // Data structures
+        var vanishX, vanishY;
+        var leftWall, rightWall;   // arrays of building segments
+        var neonSigns = [];
+        var lanterns = [];
+        var stringLights = [];
+        var steamWisps = [];
+        var rainDrops = [];
+        var groundSparkles = [];
+        var stars = [];
+
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            init();
+        }
+
+        function init() {
+            leftWall = [];
+            rightWall = [];
+            neonSigns = [];
+            lanterns = [];
+            stringLights = [];
+            steamWisps = [];
+            rainDrops = [];
+            groundSparkles = [];
+            stars = [];
+
+            // Vanishing point: center-top
+            vanishX = W * 0.50;
+            vanishY = H * 0.22;
+
+            // Alley edges at the bottom of screen
+            var alleyLeftBottom = W * 0.08;
+            var alleyRightBottom = W * 0.92;
+            // Alley edges at vanishing point height
+            var alleyLeftTop = vanishX - W * 0.04;
+            var alleyRightTop = vanishX + W * 0.04;
+
+            // --- Stars (visible in the narrow sky strip) ---
+            for (var i = 0; i < 40; i++) {
+                stars.push({
+                    x: vanishX + (Math.random() - 0.5) * W * 0.12,
+                    y: Math.random() * vanishY * 0.8,
+                    r: 0.3 + Math.random() * 0.7,
+                    a: 0.3 + Math.random() * 0.5,
+                    twinkleSpeed: 0.005 + Math.random() * 0.02
+                });
+            }
+
+            // --- Building wall segments ---
+            // Left wall: from bottom-left corner to vanishing point
+            var numFloors = 8 + Math.floor(Math.random() * 3);
+            for (var f = 0; f < numFloors; f++) {
+                var t0 = f / numFloors;
+                var t1 = (f + 1) / numFloors;
+
+                // Interpolate positions along perspective lines
+                var lx0 = lerp(alleyLeftBottom, alleyLeftTop, t0);
+                var rx0 = lerp(alleyLeftBottom + W * 0.30, alleyLeftTop, t0);
+                var y0 = lerp(H, vanishY, t0);
+                var lx1 = lerp(alleyLeftBottom, alleyLeftTop, t1);
+                var rx1 = lerp(alleyLeftBottom + W * 0.30, alleyLeftTop, t1);
+                var y1 = lerp(H, vanishY, t1);
+
+                // Windows for this floor segment
+                var floorWindows = [];
+                var numWins = Math.max(1, Math.floor((rx0 - lx0) / 25));
+                for (var w = 0; w < numWins; w++) {
+                    floorWindows.push({
+                        col: w,
+                        lit: Math.random() < 0.35,
+                        warmth: Math.random(),
+                        flickerPhase: Math.random() * Math.PI * 2,
+                        flickerSpeed: 0.01 + Math.random() * 0.03,
+                        toggleTimer: 300 + Math.floor(Math.random() * 600)
+                    });
+                }
+
+                leftWall.push({
+                    lx0: lx0, rx0: rx0, y0: y0,
+                    lx1: lx1, rx1: rx1, y1: y1,
+                    t0: t0, t1: t1,
+                    windows: floorWindows,
+                    shade: 0.02 + Math.random() * 0.03
+                });
+            }
+
+            // Right wall
+            for (var f2 = 0; f2 < numFloors; f2++) {
+                var t0r = f2 / numFloors;
+                var t1r = (f2 + 1) / numFloors;
+
+                var lx0r = lerp(alleyRightBottom - W * 0.30, alleyRightTop, t0r);
+                var rx0r = lerp(alleyRightBottom, alleyRightTop, t0r);
+                var y0r = lerp(H, vanishY, t0r);
+                var lx1r = lerp(alleyRightBottom - W * 0.30, alleyRightTop, t1r);
+                var rx1r = lerp(alleyRightBottom, alleyRightTop, t1r);
+                var y1r = lerp(H, vanishY, t1r);
+
+                var floorWinsR = [];
+                var numWinsR = Math.max(1, Math.floor((rx0r - lx0r) / 25));
+                for (var w2 = 0; w2 < numWinsR; w2++) {
+                    floorWinsR.push({
+                        col: w2,
+                        lit: Math.random() < 0.35,
+                        warmth: Math.random(),
+                        flickerPhase: Math.random() * Math.PI * 2,
+                        flickerSpeed: 0.01 + Math.random() * 0.03,
+                        toggleTimer: 300 + Math.floor(Math.random() * 600)
+                    });
+                }
+
+                rightWall.push({
+                    lx0: lx0r, rx0: rx0r, y0: y0r,
+                    lx1: lx1r, rx1: rx1r, y1: y1r,
+                    t0: t0r, t1: t1r,
+                    windows: floorWinsR,
+                    shade: 0.02 + Math.random() * 0.03
+                });
+            }
+
+            // --- Neon signs (mounted on walls) ---
+            var signDefs = [
+                { text: 'ARCADE', color: '#00ffff', side: 'left',  depth: 0.15, vertical: false, scale: 3 },
+                { text: 'BAR',    color: '#ff3333', side: 'right', depth: 0.25, vertical: true,  scale: 3 },
+                { text: 'HOTEL',  color: '#ff00ff', side: 'left',  depth: 0.35, vertical: true,  scale: 2.5 },
+                { text: 'GAMES',  color: '#39ff14', side: 'right', depth: 0.10, vertical: false, scale: 3.5 },
+                { text: 'OPEN',   color: '#ff8844', side: 'left',  depth: 0.50, vertical: false, scale: 2 },
+                { text: '24/7',   color: '#ffff00', side: 'right', depth: 0.45, vertical: false, scale: 2 },
+                { text: 'CLUB',   color: '#ff00ff', side: 'right', depth: 0.60, vertical: true,  scale: 1.8 },
+                { text: 'EAT',    color: '#ff4444', side: 'left',  depth: 0.70, vertical: false, scale: 1.5 }
+            ];
+
+            for (var si = 0; si < signDefs.length; si++) {
+                var sd = signDefs[si];
+                var depth = sd.depth;
+
+                // Position based on depth along the alley
+                var sy = lerp(H, vanishY, depth);
+                var charW = 5 * sd.scale;
+                var charH = 7 * sd.scale;
+                var gap = sd.scale;
+                var signW, signH;
+
+                if (sd.vertical) {
+                    signW = charW;
+                    signH = sd.text.length * (charH + gap) - gap;
+                } else {
+                    signW = sd.text.length * (charW + gap) - gap;
+                    signH = charH;
+                }
+
+                var sx;
+                if (sd.side === 'left') {
+                    var wallEdge = lerp(alleyLeftBottom, alleyLeftTop, depth);
+                    var wallInner = lerp(alleyLeftBottom + W * 0.30, alleyLeftTop, depth);
+                    sx = lerp(wallInner, wallEdge + signW, 0.3 + Math.random() * 0.3);
+                } else {
+                    var wallEdgeR = lerp(alleyRightBottom, alleyRightTop, depth);
+                    var wallInnerR = lerp(alleyRightBottom - W * 0.30, alleyRightTop, depth);
+                    sx = lerp(wallInnerR, wallEdgeR - signW, 0.2 + Math.random() * 0.3);
+                }
+
+                // Perspective scale factor: signs further away are smaller
+                var perspScale = 1 - depth * 0.6;
+
+                neonSigns.push({
+                    text: sd.text,
+                    x: sx,
+                    y: sy - signH * 0.5,
+                    w: signW * perspScale,
+                    h: signH * perspScale,
+                    scale: sd.scale * perspScale,
+                    color: sd.color,
+                    vertical: sd.vertical,
+                    side: sd.side,
+                    depth: depth,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.015 + Math.random() * 0.015,
+                    flickerTimer: 0,
+                    flickering: false,
+                    nextFlicker: 200 + Math.floor(Math.random() * 400)
+                });
+            }
+
+            // --- String lights across the alley ---
+            var numStrings = 4;
+            for (var sl = 0; sl < numStrings; sl++) {
+                var slDepth = 0.12 + sl * 0.18;
+                var slY = lerp(H, vanishY, slDepth);
+                var slLeftX = lerp(alleyLeftBottom + W * 0.24, alleyLeftTop, slDepth);
+                var slRightX = lerp(alleyRightBottom - W * 0.24, alleyRightTop, slDepth);
+                var slScale = 1 - slDepth * 0.5;
+
+                var bulbs = [];
+                var numBulbs = 5 + Math.floor(Math.random() * 4);
+                for (var b = 0; b < numBulbs; b++) {
+                    var bt = (b + 0.5) / numBulbs;
+                    bulbs.push({
+                        t: bt,
+                        color: Math.random() < 0.6 ? '#ffaa44' : (Math.random() < 0.5 ? '#ff4444' : '#ffdd88'),
+                        phase: Math.random() * Math.PI * 2,
+                        pulseSpeed: 0.02 + Math.random() * 0.03,
+                        r: (2 + Math.random() * 2) * slScale
+                    });
+                }
+
+                stringLights.push({
+                    leftX: slLeftX,
+                    rightX: slRightX,
+                    y: slY,
+                    sag: (15 + Math.random() * 10) * slScale,
+                    depth: slDepth,
+                    scale: slScale,
+                    bulbs: bulbs,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    swaySpeed: 0.008 + Math.random() * 0.006
+                });
+            }
+
+            // --- Steam / fog wisps ---
+            for (var sw = 0; sw < 5; sw++) {
+                var swDepth = 0.2 + Math.random() * 0.5;
+                steamWisps.push({
+                    x: Math.random() * W,
+                    y: lerp(H * 0.5, vanishY, swDepth * 0.8),
+                    w: (80 + Math.random() * 120) * (1 - swDepth * 0.4),
+                    h: (20 + Math.random() * 30) * (1 - swDepth * 0.4),
+                    speed: 0.15 + Math.random() * 0.3,
+                    opacity: 0.015 + Math.random() * 0.025,
+                    depth: swDepth
+                });
+            }
+
+            // --- Rain drops ---
+            var dropCount = Math.min(80, Math.floor(W / 12));
+            for (var rd = 0; rd < dropCount; rd++) {
+                rainDrops.push(makeRainDrop());
+            }
+
+            // --- Ground sparkles (rain splashes) ---
+            for (var gs = 0; gs < 20; gs++) {
+                groundSparkles.push({
+                    x: lerp(alleyLeftBottom + W * 0.05, alleyRightBottom - W * 0.05, Math.random()),
+                    y: H * (0.82 + Math.random() * 0.14),
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.05 + Math.random() * 0.08,
+                    r: 0.5 + Math.random() * 1
+                });
+            }
+        }
+
+        function makeRainDrop() {
+            var colors = ['rgba(0,255,255,0.6)', 'rgba(255,0,255,0.4)', 'rgba(255,230,200,0.5)'];
+            var depth = Math.random();
+            return {
+                x: Math.random() * W * 1.2 - W * 0.1,
+                y: -20 - Math.random() * H * 0.3,
+                len: (12 + Math.random() * 18) * (0.5 + depth * 0.5),
+                speed: (4 + Math.random() * 6) * (0.5 + depth * 0.5),
+                windDrift: 0.8 + Math.random() * 0.6,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                opacity: 0.2 + Math.random() * 0.4,
+                depth: depth
+            };
+        }
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        var time = 0;
+
+        function draw() {
+            time++;
+
+            // === 1. Sky gradient ===
+            var skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+            skyGrad.addColorStop(0, '#050510');
+            skyGrad.addColorStop(0.3, '#0c0820');
+            skyGrad.addColorStop(0.6, '#0a0a1e');
+            skyGrad.addColorStop(1, '#080818');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Atmospheric glow at vanishing point (distant city light)
+            var vpGlow = ctx.createRadialGradient(vanishX, vanishY, 0, vanishX, vanishY, H * 0.25);
+            vpGlow.addColorStop(0, 'rgba(140,60,200,0.10)');
+            vpGlow.addColorStop(0.4, 'rgba(80,30,150,0.05)');
+            vpGlow.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = vpGlow;
+            ctx.fillRect(0, 0, W, H * 0.5);
+
+            // Secondary warm glow (distant lanterns)
+            var warmGlow = ctx.createRadialGradient(vanishX, vanishY + H * 0.05, 0, vanishX, vanishY + H * 0.05, H * 0.15);
+            warmGlow.addColorStop(0, 'rgba(255,140,60,0.06)');
+            warmGlow.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = warmGlow;
+            ctx.fillRect(0, 0, W, H * 0.5);
+
+            // === 2. Stars (in narrow sky strip) ===
+            for (var i = 0; i < stars.length; i++) {
+                var s = stars[i];
+                var alpha = s.a + Math.sin(time * s.twinkleSpeed) * 0.2;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,' + Math.max(0.05, alpha) + ')';
+                ctx.fill();
+            }
+
+            // === 3. Distant end of alley (faded buildings at vanishing point) ===
+            var distW = W * 0.08;
+            var distH = H * 0.15;
+            var distX = vanishX - distW / 2;
+            var distY = vanishY - distH * 0.3;
+
+            ctx.fillStyle = '#0a0a1c';
+            ctx.fillRect(distX, distY, distW, distH);
+
+            // Distant windows
+            for (var dy = distY + 3; dy < distY + distH; dy += 5) {
+                for (var dx = distX + 2; dx < distX + distW - 2; dx += 5) {
+                    if (Math.random() < 0.3) {
+                        ctx.fillStyle = 'rgba(255,220,100,0.3)';
+                        ctx.fillRect(dx, dy, 2, 2);
+                    }
+                }
+            }
+
+            // === 4. Building walls (perspective) ===
+            drawWall(leftWall, 'left');
+            drawWall(rightWall, 'right');
+
+            // === 5. Neon signs ===
+            for (var ns = 0; ns < neonSigns.length; ns++) {
+                drawNeonSign(neonSigns[ns]);
+            }
+
+            // === 6. String lights & lanterns ===
+            for (var sl = 0; sl < stringLights.length; sl++) {
+                drawStringLight(stringLights[sl]);
+            }
+
+            // === 7. Steam / fog ===
+            for (var sw = 0; sw < steamWisps.length; sw++) {
+                var wisp = steamWisps[sw];
+                wisp.x += wisp.speed;
+                if (wisp.x > W + wisp.w) wisp.x = -wisp.w;
+
+                var wGrad = ctx.createRadialGradient(
+                    wisp.x + wisp.w / 2, wisp.y, 0,
+                    wisp.x + wisp.w / 2, wisp.y, wisp.w / 2
+                );
+                wGrad.addColorStop(0, 'rgba(200,180,255,' + wisp.opacity + ')');
+                wGrad.addColorStop(0.6, 'rgba(200,180,255,' + (wisp.opacity * 0.3) + ')');
+                wGrad.addColorStop(1, 'rgba(200,180,255,0)');
+                ctx.fillStyle = wGrad;
+                ctx.fillRect(wisp.x, wisp.y - wisp.h / 2, wisp.w, wisp.h);
+            }
+
+            // === 8. Rain ===
+            for (var r = 0; r < rainDrops.length; r++) {
+                var drop = rainDrops[r];
+
+                drop.y += drop.speed;
+                drop.x += drop.windDrift;
+
+                // Reset when off screen
+                if (drop.y > H + 20) {
+                    rainDrops[r] = makeRainDrop();
+                    continue;
+                }
+
+                var dropGrad = ctx.createLinearGradient(drop.x, drop.y - drop.len, drop.x, drop.y);
+                dropGrad.addColorStop(0, 'rgba(0,0,0,0)');
+                dropGrad.addColorStop(1, drop.color);
+
+                ctx.globalAlpha = drop.opacity;
+                ctx.strokeStyle = drop.color;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(drop.x, drop.y - drop.len);
+                ctx.lineTo(drop.x + drop.windDrift * 0.5, drop.y);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+
+            // === 9. Wet ground & reflections ===
+            drawGround();
+
+            // === 10. Ground sparkles (rain splashes) ===
+            for (var gs = 0; gs < groundSparkles.length; gs++) {
+                var sp = groundSparkles[gs];
+                var spAlpha = 0.3 + Math.sin(time * sp.speed + sp.phase) * 0.3;
+                if (spAlpha > 0.1) {
+                    ctx.beginPath();
+                    ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,255,255,' + spAlpha + ')';
+                    ctx.fill();
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        function drawWall(wall, side) {
+            for (var f = 0; f < wall.length; f++) {
+                var seg = wall[f];
+
+                // Building face (trapezoid)
+                var shade = seg.shade;
+                var baseColor = side === 'left' ? [10, 10, 26] : [12, 10, 24];
+
+                ctx.fillStyle = 'rgb(' + baseColor[0] + ',' + baseColor[1] + ',' + baseColor[2] + ')';
+                ctx.beginPath();
+                ctx.moveTo(seg.lx0, seg.y0);
+                ctx.lineTo(seg.rx0, seg.y0);
+                ctx.lineTo(seg.rx1, seg.y1);
+                ctx.lineTo(seg.lx1, seg.y1);
+                ctx.closePath();
+                ctx.fill();
+
+                // Floor line separator
+                ctx.strokeStyle = 'rgba(0,255,255,0.04)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(seg.lx0, seg.y0);
+                ctx.lineTo(seg.rx0, seg.y0);
+                ctx.stroke();
+
+                // Inner edge highlight (the alley-facing edge)
+                if (side === 'left') {
+                    ctx.strokeStyle = 'rgba(0,255,255,0.06)';
+                    ctx.beginPath();
+                    ctx.moveTo(seg.rx0, seg.y0);
+                    ctx.lineTo(seg.rx1, seg.y1);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeStyle = 'rgba(0,255,255,0.06)';
+                    ctx.beginPath();
+                    ctx.moveTo(seg.lx0, seg.y0);
+                    ctx.lineTo(seg.lx1, seg.y1);
+                    ctx.stroke();
+                }
+
+                // Windows
+                var wins = seg.windows;
+                var segH = seg.y0 - seg.y1;
+                var segW0 = seg.rx0 - seg.lx0;
+                var segW1 = seg.rx1 - seg.lx1;
+
+                for (var wi = 0; wi < wins.length; wi++) {
+                    var win = wins[wi];
+                    // Window toggle timer
+                    win.toggleTimer--;
+                    if (win.toggleTimer <= 0) {
+                        win.lit = !win.lit;
+                        win.toggleTimer = 300 + Math.floor(Math.random() * 600);
+                    }
+
+                    // Position window within the segment using perspective interpolation
+                    var wt = 0.3; // vertical position within floor
+                    var wy = lerp(seg.y0, seg.y1, wt);
+                    var wSegW = lerp(segW0, segW1, wt);
+                    var wSegLeft = lerp(seg.lx0, seg.lx1, wt);
+
+                    var margin = wSegW * 0.12;
+                    var winAreaW = wSegW - margin * 2;
+                    var winSpacing = winAreaW / wins.length;
+                    var wx = wSegLeft + margin + wi * winSpacing + winSpacing * 0.2;
+                    var winW = Math.max(2, winSpacing * 0.5);
+                    var winH = Math.max(2, segH * 0.25);
+
+                    if (win.lit) {
+                        var flicker = 0.5 + Math.sin(time * win.flickerSpeed + win.flickerPhase) * 0.15;
+                        var wColor;
+                        if (win.warmth > 0.5) {
+                            wColor = 'rgba(255,220,100,' + (flicker * 0.7) + ')';
+                        } else {
+                            wColor = 'rgba(150,200,255,' + (flicker * 0.5) + ')';
+                        }
+                        ctx.fillStyle = wColor;
+                        ctx.fillRect(wx, wy - winH / 2, winW, winH);
+
+                        // Window glow
+                        ctx.fillStyle = wColor.replace(/[\d.]+\)$/, (flicker * 0.1) + ')');
+                        ctx.fillRect(wx - 1, wy - winH / 2 - 1, winW + 2, winH + 2);
+                    } else {
+                        ctx.fillStyle = 'rgba(15,15,35,0.6)';
+                        ctx.fillRect(wx, wy - winH / 2, winW, winH);
+                    }
+                }
+
+                // Pipes/conduit running down the wall (occasional)
+                if (f === 0 && side === 'left') {
+                    ctx.strokeStyle = 'rgba(40,40,70,0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    var pipeX = seg.rx0 - (seg.rx0 - seg.lx0) * 0.15;
+                    var pipeX2 = seg.rx1 - (seg.rx1 - seg.lx1) * 0.15;
+                    ctx.moveTo(pipeX, seg.y0);
+                    ctx.lineTo(pipeX2, seg.y1);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function drawNeonSign(sign) {
+            // Flicker logic
+            sign.nextFlicker--;
+            if (sign.nextFlicker <= 0 && !sign.flickering) {
+                sign.flickering = true;
+                sign.flickerTimer = 5 + Math.floor(Math.random() * 15);
+                sign.nextFlicker = 200 + Math.floor(Math.random() * 400);
+            }
+            if (sign.flickering) {
+                sign.flickerTimer--;
+                if (sign.flickerTimer <= 0) sign.flickering = false;
+            }
+
+            var isOff = sign.flickering && (sign.flickerTimer % 3 === 0);
+            var pulse = 0.6 + Math.sin(time * sign.speed + sign.phase) * 0.4;
+
+            if (isOff) {
+                // Draw dim backing panel only
+                ctx.fillStyle = 'rgba(5,5,15,0.6)';
+                var padX = sign.scale * 1.5;
+                var padY = sign.scale * 1.5;
+                ctx.fillRect(sign.x - padX, sign.y - padY, sign.w + padX * 2, sign.h + padY * 2);
+                return;
+            }
+
+            // Backing panel
+            var padX2 = sign.scale * 1.5;
+            var padY2 = sign.scale * 1.5;
+            ctx.fillStyle = 'rgba(5,5,15,0.75)';
+            ctx.fillRect(sign.x - padX2, sign.y - padY2, sign.w + padX2 * 2, sign.h + padY2 * 2);
+
+            // Border glow
+            ctx.strokeStyle = sign.color;
+            ctx.globalAlpha = pulse * 0.3;
+            ctx.shadowColor = sign.color;
+            ctx.shadowBlur = 6 * pulse;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(sign.x - padX2, sign.y - padY2, sign.w + padX2 * 2, sign.h + padY2 * 2);
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+
+            // Render pixel text
+            ctx.fillStyle = sign.color;
+            ctx.shadowColor = sign.color;
+            ctx.shadowBlur = 10 * pulse;
+            ctx.globalAlpha = pulse;
+
+            var charW = 5 * sign.scale;
+            var charH = 7 * sign.scale;
+            var gap = sign.scale;
+
+            for (var ci = 0; ci < sign.text.length; ci++) {
+                var ch = sign.text[ci];
+                var charData = PIXEL_FONT[ch];
+                if (!charData) continue;
+
+                var cx, cy;
+                if (sign.vertical) {
+                    cx = sign.x;
+                    cy = sign.y + ci * (charH + gap);
+                } else {
+                    cx = sign.x + ci * (charW + gap);
+                    cy = sign.y;
+                }
+
+                for (var row = 0; row < 7; row++) {
+                    var bits = charData[row];
+                    for (var col = 0; col < 5; col++) {
+                        if (bits & (1 << (4 - col))) {
+                            ctx.fillRect(
+                                cx + col * sign.scale,
+                                cy + row * sign.scale,
+                                sign.scale, sign.scale
+                            );
+                        }
+                    }
+                }
+            }
+
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+
+            // Color spill glow onto nearby wall area
+            var spillGrad = ctx.createRadialGradient(
+                sign.x + sign.w / 2, sign.y + sign.h / 2, 0,
+                sign.x + sign.w / 2, sign.y + sign.h / 2, Math.max(sign.w, sign.h) * 1.5
+            );
+            spillGrad.addColorStop(0, sign.color.replace(')', ',0.04)').replace('rgb', 'rgba').replace('##', '#'));
+            // Parse color for rgba
+            var spillAlpha = pulse * 0.04;
+            ctx.globalAlpha = spillAlpha;
+            ctx.fillStyle = sign.color;
+            ctx.shadowColor = sign.color;
+            ctx.shadowBlur = 30;
+            ctx.fillRect(sign.x - 20, sign.y - 20, sign.w + 40, sign.h + 40);
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+
+        function drawStringLight(sl) {
+            var sway = Math.sin(time * sl.swaySpeed + sl.swayPhase) * 3 * sl.scale;
+
+            // Draw the string (catenary curve approximation)
+            ctx.strokeStyle = 'rgba(60,50,40,0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var t = 0; t <= 1; t += 0.05) {
+                var sx = lerp(sl.leftX, sl.rightX, t);
+                var sagY = sl.sag * 4 * t * (1 - t); // parabolic sag
+                var sy = sl.y + sagY + sway * Math.sin(t * Math.PI);
+                if (t === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+
+            // Draw bulbs
+            for (var b = 0; b < sl.bulbs.length; b++) {
+                var bulb = sl.bulbs[b];
+                var bx = lerp(sl.leftX, sl.rightX, bulb.t);
+                var sagYb = sl.sag * 4 * bulb.t * (1 - bulb.t);
+                var by = sl.y + sagYb + sway * Math.sin(bulb.t * Math.PI);
+
+                var bPulse = 0.6 + Math.sin(time * bulb.pulseSpeed + bulb.phase) * 0.4;
+
+                // Radial glow
+                var bGlow = ctx.createRadialGradient(bx, by, 0, bx, by, bulb.r * 6);
+                bGlow.addColorStop(0, bulb.color.replace(')', ',' + (0.15 * bPulse) + ')').replace('#', 'rgba('));
+                // Simple warm glow
+                ctx.globalAlpha = bPulse * 0.15;
+                ctx.fillStyle = bulb.color;
+                ctx.shadowColor = bulb.color;
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(bx, by, bulb.r * 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+
+                // Bright center
+                ctx.fillStyle = bulb.color;
+                ctx.shadowColor = bulb.color;
+                ctx.shadowBlur = 8 * bPulse;
+                ctx.globalAlpha = bPulse;
+                ctx.beginPath();
+                ctx.arc(bx, by, bulb.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function drawGround() {
+            var groundTop = H * 0.80;
+            var groundH = H - groundTop;
+
+            // Wet ground surface
+            var gGrad = ctx.createLinearGradient(0, groundTop, 0, H);
+            gGrad.addColorStop(0, '#080814');
+            gGrad.addColorStop(0.3, '#0a0a18');
+            gGrad.addColorStop(1, '#060610');
+            ctx.fillStyle = gGrad;
+            ctx.fillRect(0, groundTop, W, groundH);
+
+            // Subtle wet sheen
+            ctx.fillStyle = 'rgba(100,120,200,0.02)';
+            ctx.fillRect(0, groundTop, W, groundH);
+
+            // Reflection streaks from neon signs
+            for (var r = 0; r < neonSigns.length; r++) {
+                var sign = neonSigns[r];
+                var rPulse = 0.6 + Math.sin(time * sign.speed + sign.phase) * 0.4;
+                var wobble = Math.sin(time * 0.03 + r * 1.5) * 3;
+
+                // Skip if sign is flickering off
+                if (sign.flickering && sign.flickerTimer % 3 === 0) continue;
+
+                ctx.globalAlpha = rPulse * 0.05;
+                ctx.fillStyle = sign.color;
+                ctx.shadowColor = sign.color;
+                ctx.shadowBlur = 20;
+
+                // Vertical reflection band
+                var reflX = sign.x + sign.w / 2 + wobble;
+                var reflW = sign.w * 0.6;
+                ctx.fillRect(reflX - reflW / 2, groundTop, reflW, groundH);
+
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+
+            // Reflection from string light bulbs
+            for (var sl = 0; sl < stringLights.length; sl++) {
+                var sLight = stringLights[sl];
+                for (var b = 0; b < sLight.bulbs.length; b++) {
+                    var bulb = sLight.bulbs[b];
+                    var bx = lerp(sLight.leftX, sLight.rightX, bulb.t);
+                    var bPulse = 0.6 + Math.sin(time * bulb.pulseSpeed + bulb.phase) * 0.4;
+                    var wobble2 = Math.sin(time * 0.025 + b) * 2;
+
+                    ctx.globalAlpha = bPulse * 0.025;
+                    ctx.fillStyle = bulb.color;
+                    ctx.fillRect(bx + wobble2 - 2, groundTop + 5, 4, groundH * 0.5);
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            // Horizon line where ground meets alley walls
+            ctx.strokeStyle = 'rgba(0,255,255,0.03)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, groundTop);
+            ctx.lineTo(W, groundTop);
+            ctx.stroke();
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
+    })();
+</script>
