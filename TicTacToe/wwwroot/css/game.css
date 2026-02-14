@@ -46,11 +46,23 @@
 }
 
 .mark-O {
-    color: var(--neon-pink);
-    text-shadow:
+    color: transparent;
+    position: relative;
+}
+
+.mark-O::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--neon-pink);
+    border-radius: 50%;
+    box-shadow:
         0 0 10px rgba(255, 0, 255, 0.8),
         0 0 20px rgba(255, 0, 255, 0.5),
-        0 0 40px rgba(255, 0, 255, 0.3);
+        0 0 40px rgba(255, 0, 255, 0.3),
+        inset 0 0 10px rgba(255, 0, 255, 0.8),
+        inset 0 0 20px rgba(255, 0, 255, 0.5);
 }
 
 /* ===== ANIMATIONS ===== */
@@ -307,6 +319,12 @@
 
     .cell {
         font-size: 2rem;
+    }
+
+    .mark-O::after {
+        width: 45px;
+        height: 45px;
+        border-width: 5px;
     }
 
     .retro-title {
