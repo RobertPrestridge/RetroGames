@@ -25,16 +25,41 @@
         var ctx = canvas.getContext('2d');
         var W, H;
 
+        // Pixel font: 5x7 bitmap, each row is a 5-bit mask (bit4=left, bit0=right)
+        var PIXEL_FONT = {
+            'A': [14,17,17,31,17,17,17],
+            'B': [30,17,17,30,17,17,30],
+            'C': [14,17,16,16,16,17,14],
+            'D': [30,17,17,17,17,17,30],
+            'E': [31,16,16,30,16,16,31],
+            'G': [14,17,16,23,17,17,14],
+            'H': [17,17,17,31,17,17,17],
+            'L': [16,16,16,16,16,16,31],
+            'M': [17,27,21,17,17,17,17],
+            'N': [17,25,21,19,17,17,17],
+            'O': [14,17,17,17,17,17,14],
+            'P': [30,17,17,30,16,16,16],
+            'R': [30,17,17,30,20,18,17],
+            'S': [14,17,16,14,1,17,14],
+            'T': [31,4,4,4,4,4,4],
+            'Y': [17,17,10,4,4,4,4],
+            '2': [14,17,1,2,4,8,31],
+            '4': [2,6,10,18,31,2,2],
+            '7': [31,1,2,4,4,4,4],
+            '/': [1,1,2,4,8,16,16]
+        };
+
         // Data structures
         var stars = [];
-        var mountainLayers = []; // 3 arrays of point arrays
+        var mountainLayers = [];
         var farBuildings = [];
         var buildings = [];
         var neonTubes = [];
+        var neonSigns = [];
         var pillars = [];
         var train = { x: 0, speed: 1, cars: 3, carWidth: 0, carHeight: 0, gapWidth: 4, totalWidth: 0 };
         var trackY = 0;
-        var trackH = 6; // rail beam thickness
+        var trackH = 6;
 
         function resize() {
             W = canvas.width = window.innerWidth;
@@ -48,6 +73,7 @@
             farBuildings = [];
             buildings = [];
             neonTubes = [];
+            neonSigns = [];
             pillars = [];
 
             // Train dimensions scale with canvas
@@ -152,6 +178,18 @@
                 var boxH = 4 + Math.random() * 6;
                 var boxX = bx + bw * (0.2 + Math.random() * 0.5);
 
+                // Setback (stepped profile for tall buildings)
+                var hasSetback = bh > H * 0.35 && Math.random() < 0.4;
+                var setbackH = hasSetback ? bh * (0.3 + Math.random() * 0.2) : 0;
+                var setbackInset = hasSetback ? bw * (0.1 + Math.random() * 0.1) : 0;
+
+                // Water tower on some rooftops
+                var hasWaterTower = !hasAntenna && !hasBox && Math.random() < 0.15;
+                var waterTowerW = 10 + Math.random() * 8;
+                var waterTowerH = 8 + Math.random() * 6;
+                var waterTowerX = bx + bw * (0.3 + Math.random() * 0.4);
+                var waterTowerLegH = 4 + Math.random() * 4;
+
                 buildings.push({
                     x: bx, w: bw, h: bh,
                     windows: wins,
@@ -161,7 +199,15 @@
                     hasBox: hasBox,
                     boxW: boxW,
                     boxH: boxH,
-                    boxX: boxX
+                    boxX: boxX,
+                    hasSetback: hasSetback,
+                    setbackH: setbackH,
+                    setbackInset: setbackInset,
+                    hasWaterTower: hasWaterTower,
+                    waterTowerW: waterTowerW,
+                    waterTowerH: waterTowerH,
+                    waterTowerX: waterTowerX,
+                    waterTowerLegH: waterTowerLegH
                 });
 
                 // Neon tubes on some buildings
@@ -207,6 +253,65 @@
                 }
 
                 bx += bw + 1 + Math.floor(Math.random() * 3);
+            }
+
+            // --- Neon Signs on Buildings ---
+            var signConfigs = [
+                { text: 'ARCADE', color: '#00ffff', scale: 4, vertical: false },
+                { text: 'HOTEL',  color: '#ffaa00', scale: 4, vertical: true },
+                { text: 'BAR',    color: '#39ff14', scale: 5, vertical: false },
+                { text: '24/7',   color: '#ff3333', scale: 3, vertical: false },
+                { text: 'GAMES',  color: '#ff00ff', scale: 4, vertical: false }
+            ];
+            var zoneW = W / signConfigs.length;
+            for (var si = 0; si < signConfigs.length; si++) {
+                var zStart = si * zoneW;
+                var zEnd = zStart + zoneW;
+                var bestB = null;
+                var bestBH = 0;
+                for (var sbi = 0; sbi < buildings.length; sbi++) {
+                    var sbd = buildings[sbi];
+                    var sbCenter = sbd.x + sbd.w / 2;
+                    if (sbCenter >= zStart && sbCenter < zEnd && sbd.h > bestBH && sbd.w > 50) {
+                        bestBH = sbd.h;
+                        bestB = sbd;
+                    }
+                }
+                if (bestB) {
+                    var sc = signConfigs[si];
+                    var charW = 5 * sc.scale;
+                    var charH = 7 * sc.scale;
+                    var gap = sc.scale;
+                    var signW, signH, signX, signY;
+                    if (sc.vertical) {
+                        signW = charW;
+                        signH = sc.text.length * (charH + gap) - gap;
+                        signX = bestB.x + bestB.w - signW - 4;
+                        signY = (H - bestB.h) + 15;
+                    } else {
+                        signW = sc.text.length * (charW + gap) - gap;
+                        signH = charH;
+                        signX = bestB.x + (bestB.w - signW) / 2;
+                        signY = (H - bestB.h) + 12 + Math.random() * (bestB.h * 0.15);
+                    }
+                    neonSigns.push({
+                        text: sc.text,
+                        x: signX,
+                        y: signY,
+                        w: signW,
+                        h: signH,
+                        scale: sc.scale,
+                        color: sc.color,
+                        vertical: sc.vertical,
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.015 + Math.random() * 0.01,
+                        flickerTimer: 0,
+                        flickering: false,
+                        drawProgress: 0,
+                        drawSpeed: 0.003 + Math.random() * 0.005,
+                        drawn: false
+                    });
+                }
             }
 
             // --- Monorail Pillars & Stations ---
@@ -298,16 +403,39 @@
                 var topY = H - b.h;
 
                 // Building body with slight variation
-                ctx.fillStyle = j % 2 === 0 ? '#08081a' : '#0c0c24';
-                ctx.fillRect(b.x, topY, b.w, b.h);
+                var bodyColor = j % 2 === 0 ? '#08081a' : '#0c0c24';
+                ctx.fillStyle = bodyColor;
+                if (b.hasSetback) {
+                    // Lower section (full width)
+                    ctx.fillRect(b.x, topY + b.setbackH, b.w, b.h - b.setbackH);
+                    // Upper section (narrower)
+                    ctx.fillRect(b.x + b.setbackInset, topY, b.w - 2 * b.setbackInset, b.setbackH);
+                    // Setback ledge highlight
+                    ctx.fillStyle = 'rgba(0,255,255,0.08)';
+                    ctx.fillRect(b.x, topY + b.setbackH, b.w, 1);
+                    // Top edge of upper section
+                    ctx.fillStyle = 'rgba(0,255,255,0.1)';
+                    ctx.fillRect(b.x + b.setbackInset, topY, b.w - 2 * b.setbackInset, 1);
+                    // Side edges
+                    ctx.fillStyle = 'rgba(0,255,255,0.03)';
+                    ctx.fillRect(b.x + b.setbackInset, topY, 1, b.setbackH);
+                    ctx.fillRect(b.x, topY + b.setbackH, 1, b.h - b.setbackH);
+                } else {
+                    ctx.fillRect(b.x, topY, b.w, b.h);
+                    // Top edge highlight
+                    ctx.fillStyle = 'rgba(0,255,255,0.1)';
+                    ctx.fillRect(b.x, topY, b.w, 1);
+                    // Side edge highlight (left)
+                    ctx.fillStyle = 'rgba(0,255,255,0.03)';
+                    ctx.fillRect(b.x, topY, 1, b.h);
+                }
 
-                // Top edge highlight
-                ctx.fillStyle = 'rgba(0,255,255,0.1)';
-                ctx.fillRect(b.x, topY, b.w, 1);
-
-                // Side edge highlight (left)
-                ctx.fillStyle = 'rgba(0,255,255,0.03)';
-                ctx.fillRect(b.x, topY, 1, b.h);
+                // Building ledges (horizontal accent lines)
+                ctx.fillStyle = 'rgba(0,255,255,0.04)';
+                var ledgeSpacing = 30 + Math.floor(j * 7 % 20);
+                for (var ly = topY + ledgeSpacing; ly < H - 10; ly += ledgeSpacing) {
+                    ctx.fillRect(b.x, ly, b.w, 1);
+                }
 
                 // Windows
                 var wins = b.windows;
@@ -351,6 +479,30 @@
                     ctx.fillRect(b.boxX, topY - b.boxH, b.boxW, b.boxH);
                     ctx.fillStyle = 'rgba(0,255,255,0.05)';
                     ctx.fillRect(b.boxX, topY - b.boxH, b.boxW, 1);
+                }
+
+                // Water tower
+                if (b.hasWaterTower) {
+                    var wtx = b.waterTowerX;
+                    var wty = topY - b.waterTowerLegH - b.waterTowerH;
+                    // Legs
+                    ctx.fillStyle = '#0a0a20';
+                    ctx.fillRect(wtx + 2, topY - b.waterTowerLegH, 2, b.waterTowerLegH);
+                    ctx.fillRect(wtx + b.waterTowerW - 4, topY - b.waterTowerLegH, 2, b.waterTowerLegH);
+                    // Tank body
+                    ctx.fillStyle = '#0e0e26';
+                    ctx.fillRect(wtx, wty, b.waterTowerW, b.waterTowerH);
+                    // Tank top highlight
+                    ctx.fillStyle = 'rgba(0,255,255,0.06)';
+                    ctx.fillRect(wtx, wty, b.waterTowerW, 1);
+                    // Conical top
+                    ctx.fillStyle = '#101028';
+                    ctx.beginPath();
+                    ctx.moveTo(wtx, wty);
+                    ctx.lineTo(wtx + b.waterTowerW / 2, wty - 4);
+                    ctx.lineTo(wtx + b.waterTowerW, wty);
+                    ctx.closePath();
+                    ctx.fill();
                 }
             }
 
@@ -404,6 +556,95 @@
                         ctx.shadowBlur = 0;
                         ctx.globalAlpha = 1;
                     }
+                }
+            }
+
+            // === 6b. Large Neon Signs ===
+            for (var ns = 0; ns < neonSigns.length; ns++) {
+                var sign = neonSigns[ns];
+
+                // Draw-in animation
+                if (!sign.drawn) {
+                    sign.drawProgress = Math.min(1, sign.drawProgress + sign.drawSpeed);
+                    if (sign.drawProgress >= 1) sign.drawn = true;
+                }
+
+                // Random flicker
+                if (sign.drawn && !sign.flickering && Math.random() < 0.0008) {
+                    sign.flickering = true;
+                    sign.flickerTimer = 5 + Math.floor(Math.random() * 12);
+                }
+                if (sign.flickering) {
+                    sign.flickerTimer--;
+                    if (sign.flickerTimer <= 0) sign.flickering = false;
+                }
+
+                var sFlicker = sign.flickering && (sign.flickerTimer % 3 === 0);
+                var sPulse = 0.7 + Math.sin(time * sign.speed + sign.phase) * 0.3;
+
+                if (!sFlicker) {
+                    // Backing panel
+                    var padX = sign.scale * 2;
+                    var padY = sign.scale * 2;
+                    ctx.fillStyle = 'rgba(5,5,15,0.85)';
+                    ctx.fillRect(sign.x - padX, sign.y - padY, sign.w + padX * 2, sign.h + padY * 2);
+
+                    // Border glow
+                    ctx.strokeStyle = sign.color;
+                    ctx.globalAlpha = sPulse * 0.4;
+                    ctx.shadowColor = sign.color;
+                    ctx.shadowBlur = 6 * sPulse;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(sign.x - padX, sign.y - padY, sign.w + padX * 2, sign.h + padY * 2);
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+
+                    // Render pixel text
+                    ctx.fillStyle = sign.color;
+                    ctx.shadowColor = sign.color;
+                    ctx.shadowBlur = 10 * sPulse;
+                    ctx.globalAlpha = sPulse;
+
+                    var charsDrawn = Math.ceil(sign.text.length * sign.drawProgress);
+                    for (var sci = 0; sci < charsDrawn; sci++) {
+                        var ch = sign.text[sci];
+                        var charData = PIXEL_FONT[ch];
+                        if (!charData) continue;
+
+                        var scx, scy;
+                        if (sign.vertical) {
+                            scx = sign.x;
+                            scy = sign.y + sci * (7 * sign.scale + sign.scale);
+                        } else {
+                            scx = sign.x + sci * (5 * sign.scale + sign.scale);
+                            scy = sign.y;
+                        }
+
+                        for (var row = 0; row < 7; row++) {
+                            var bits = charData[row];
+                            for (var col = 0; col < 5; col++) {
+                                if (bits & (1 << (4 - col))) {
+                                    ctx.fillRect(
+                                        scx + col * sign.scale,
+                                        scy + row * sign.scale,
+                                        sign.scale, sign.scale
+                                    );
+                                }
+                            }
+                        }
+                    }
+
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+
+                    // Extra outer glow pass
+                    ctx.globalAlpha = sPulse * 0.15;
+                    ctx.fillStyle = sign.color;
+                    ctx.shadowColor = sign.color;
+                    ctx.shadowBlur = 25;
+                    ctx.fillRect(sign.x - padX, sign.y - padY, sign.w + padX * 2, sign.h + padY * 2);
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
                 }
             }
 
@@ -853,6 +1094,20 @@
                 var nt = neonTubes[ri];
                 ctx.fillStyle = nt.color;
                 ctx.fillRect(nt.x + nt.w * 0.3, reflectTop, 2, H - reflectTop);
+            }
+            ctx.globalAlpha = 1;
+
+            // Neon sign reflections on wet ground
+            for (var nsr = 0; nsr < neonSigns.length; nsr++) {
+                var sRef = neonSigns[nsr];
+                if (!sRef.drawn && sRef.drawProgress < 0.3) continue;
+                var refPulse = 0.7 + Math.sin(time * sRef.speed + sRef.phase) * 0.3;
+                ctx.globalAlpha = refPulse * 0.06;
+                ctx.fillStyle = sRef.color;
+                ctx.shadowColor = sRef.color;
+                ctx.shadowBlur = 15;
+                ctx.fillRect(sRef.x, reflectTop, sRef.w, H - reflectTop);
+                ctx.shadowBlur = 0;
             }
             ctx.globalAlpha = 1;
 
