@@ -23,12 +23,16 @@
     var CELL_SIZE = 13;
     var GRID_WIDTH = 60;
     var GRID_HEIGHT = 40;
+    var TRAIL_WIDTH = 3;
+    var TRAIL_GLOW = 8;
+    var HEAD_RADIUS = 3;
+    var HEAD_GLOW = 20;
     var P1_COLOR = '#00ffff';
-    var P1_TRAIL_COLOR = 'rgba(0, 255, 255, 0.7)';
-    var P1_GLOW = 'rgba(0, 255, 255, 0.4)';
+    var P1_TRAIL_COLOR = 'rgba(0, 255, 255, 1.0)';
+    var P1_GLOW = 'rgba(0, 255, 255, 0.8)';
     var P2_COLOR = '#ff00ff';
-    var P2_TRAIL_COLOR = 'rgba(255, 0, 255, 0.7)';
-    var P2_GLOW = 'rgba(255, 0, 255, 0.4)';
+    var P2_TRAIL_COLOR = 'rgba(255, 0, 255, 1.0)';
+    var P2_GLOW = 'rgba(255, 0, 255, 0.8)';
     var HEAD_COLOR = '#ffffff';
     var GRID_LINE_COLOR = 'rgba(30, 30, 80, 0.5)';
     var BG_COLOR = '#0a0a1a';
@@ -81,18 +85,62 @@
             ctx.stroke();
         }
 
-        // Trails
+        // Trails — thin connected lines between cell centers
+        ctx.lineWidth = TRAIL_WIDTH;
+        ctx.lineCap = 'square';
+
+        // Draw P1 trails
+        ctx.strokeStyle = P1_TRAIL_COLOR;
+        ctx.fillStyle = P1_TRAIL_COLOR;
+        ctx.shadowColor = P1_GLOW;
+        ctx.shadowBlur = TRAIL_GLOW;
         for (var x = 0; x < GRID_WIDTH; x++) {
             for (var y = 0; y < GRID_HEIGHT; y++) {
-                if (grid[x][y] === 1) {
-                    ctx.fillStyle = P1_TRAIL_COLOR;
-                    ctx.fillRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-                } else if (grid[x][y] === 2) {
-                    ctx.fillStyle = P2_TRAIL_COLOR;
-                    ctx.fillRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+                if (grid[x][y] !== 1) continue;
+                var cx = x * CELL_SIZE + CELL_SIZE / 2;
+                var cy = y * CELL_SIZE + CELL_SIZE / 2;
+                if (x + 1 < GRID_WIDTH && grid[x + 1][y] === 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx + CELL_SIZE, cy);
+                    ctx.stroke();
                 }
+                if (y + 1 < GRID_HEIGHT && grid[x][y + 1] === 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx, cy + CELL_SIZE);
+                    ctx.stroke();
+                }
+                ctx.fillRect(cx - TRAIL_WIDTH / 2, cy - TRAIL_WIDTH / 2, TRAIL_WIDTH, TRAIL_WIDTH);
             }
         }
+
+        // Draw P2 trails
+        ctx.strokeStyle = P2_TRAIL_COLOR;
+        ctx.fillStyle = P2_TRAIL_COLOR;
+        ctx.shadowColor = P2_GLOW;
+        ctx.shadowBlur = TRAIL_GLOW;
+        for (var x = 0; x < GRID_WIDTH; x++) {
+            for (var y = 0; y < GRID_HEIGHT; y++) {
+                if (grid[x][y] !== 2) continue;
+                var cx = x * CELL_SIZE + CELL_SIZE / 2;
+                var cy = y * CELL_SIZE + CELL_SIZE / 2;
+                if (x + 1 < GRID_WIDTH && grid[x + 1][y] === 2) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx + CELL_SIZE, cy);
+                    ctx.stroke();
+                }
+                if (y + 1 < GRID_HEIGHT && grid[x][y + 1] === 2) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx, cy + CELL_SIZE);
+                    ctx.stroke();
+                }
+                ctx.fillRect(cx - TRAIL_WIDTH / 2, cy - TRAIL_WIDTH / 2, TRAIL_WIDTH, TRAIL_WIDTH);
+            }
+        }
+        ctx.shadowBlur = 0;
 
         // Player heads (bright glow)
         if (p1 && p1.alive) {
@@ -109,15 +157,19 @@
 
         // Glow
         ctx.shadowColor = glowColor;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = HEAD_GLOW;
 
-        // Head
+        // Outer white circle
         ctx.fillStyle = HEAD_COLOR;
-        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.beginPath();
+        ctx.arc(cx, cy, HEAD_RADIUS, 0, 2 * Math.PI);
+        ctx.fill();
 
-        // Inner color
+        // Inner colored circle
         ctx.fillStyle = color;
-        ctx.fillRect(x * CELL_SIZE + 2, y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+        ctx.beginPath();
+        ctx.arc(cx, cy, HEAD_RADIUS - 1, 0, 2 * Math.PI);
+        ctx.fill();
 
         ctx.shadowBlur = 0;
     }
