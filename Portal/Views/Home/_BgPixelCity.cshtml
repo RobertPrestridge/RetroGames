@@ -1,4 +1,4 @@
-@* Background 4: Canvas Pixel City — HTML5 Canvas with animated neon tubes *@
+@* Background 4: Canvas Pixel City — Cyberpunk neon city with mountains & monorail *@
 <div class="bg-scene bg-pixel-city" id="bgPixelCity">
     <canvas id="pixelCityCanvas"></canvas>
 </div>
@@ -24,9 +24,17 @@
         if (!canvas) return;
         var ctx = canvas.getContext('2d');
         var W, H;
+
+        // Data structures
+        var stars = [];
+        var mountainLayers = []; // 3 arrays of point arrays
+        var farBuildings = [];
         var buildings = [];
         var neonTubes = [];
-        var stars = [];
+        var pillars = [];
+        var train = { x: 0, speed: 1, cars: 3, carWidth: 0, carHeight: 0, gapWidth: 4, totalWidth: 0 };
+        var trackY = 0;
+        var trackH = 6; // rail beam thickness
 
         function resize() {
             W = canvas.width = window.innerWidth;
@@ -35,35 +43,134 @@
         }
 
         function init() {
+            stars = [];
+            mountainLayers = [];
+            farBuildings = [];
             buildings = [];
             neonTubes = [];
-            stars = [];
+            pillars = [];
 
-            // Stars
-            for (var i = 0; i < 80; i++) {
+            // Train dimensions scale with canvas
+            train.carWidth = Math.max(100, W * 0.10);
+            train.carHeight = Math.max(20, H * 0.032);
+            train.gapWidth = 4;
+            train.totalWidth = train.cars * train.carWidth + (train.cars - 1) * train.gapWidth;
+            train.speed = Math.max(0.6, W * 0.0008);
+
+            // Track position at ~77% down
+            trackY = H * 0.77;
+            trackH = Math.max(6, H * 0.008);
+
+            // --- Stars (120, top 40%) ---
+            for (var i = 0; i < 120; i++) {
                 stars.push({
                     x: Math.random() * W,
-                    y: Math.random() * H * 0.5,
+                    y: Math.random() * H * 0.4,
                     r: 0.5 + Math.random(),
                     a: 0.3 + Math.random() * 0.5,
                     twinkleSpeed: 0.005 + Math.random() * 0.015
                 });
             }
 
-            // Buildings
-            var x = 0;
-            while (x < W + 150) {
-                var bw = 40 + Math.random() * 100;
-                var bh = H * (0.15 + Math.random() * 0.35);
-                buildings.push({ x: x, w: bw, h: bh });
+            // --- Mountain Layers (3 layers) ---
+            var mtConfigs = [
+                { baseY: 0.20, peakRange: 0.06, color: '#0a0818', glowColor: 'rgba(100,0,200,0.15)', peaks: 8 },
+                { baseY: 0.24, peakRange: 0.08, color: '#0c0a20', glowColor: 'rgba(180,0,255,0.2)', peaks: 7 },
+                { baseY: 0.28, peakRange: 0.10, color: '#0e0c24', glowColor: 'rgba(140,0,255,0.25)', peaks: 6 }
+            ];
+            for (var ml = 0; ml < mtConfigs.length; ml++) {
+                var cfg = mtConfigs[ml];
+                var points = [];
+                var numPeaks = cfg.peaks + Math.floor(Math.random() * 3);
+                var segW = W / numPeaks;
 
-                // Neon tube on some buildings
+                points.push({ x: 0, y: H * cfg.baseY });
+                for (var p = 0; p < numPeaks; p++) {
+                    var peakX = segW * p + segW * (0.3 + Math.random() * 0.4);
+                    var peakY = H * (cfg.baseY - cfg.peakRange * (0.4 + Math.random() * 0.6));
+                    var valleyX = segW * (p + 1);
+                    var valleyY = H * (cfg.baseY - cfg.peakRange * 0.1 + Math.random() * cfg.peakRange * 0.2);
+                    points.push({ x: peakX, y: peakY });
+                    points.push({ x: valleyX, y: valleyY });
+                }
+                points.push({ x: W, y: H * cfg.baseY });
+
+                mountainLayers.push({
+                    points: points,
+                    color: cfg.color,
+                    glowColor: cfg.glowColor,
+                    baseY: H * cfg.baseY
+                });
+            }
+
+            // --- Far Buildings (background city silhouettes) ---
+            var fx = 0;
+            while (fx < W + 60) {
+                var fbw = 20 + Math.random() * 50;
+                var fbh = H * (0.10 + Math.random() * 0.10);
+                farBuildings.push({ x: fx, w: fbw, h: fbh });
+                fx += fbw + 3 + Math.random() * 8;
+            }
+
+            // --- Main Buildings (enhanced) ---
+            var bx = 0;
+            while (bx < W + 150) {
+                var bw = 40 + Math.random() * 100;
+                var bh = H * (0.20 + Math.random() * 0.30);
+                var topY = H - bh;
+
+                // Window grid
+                var wins = [];
+                var winW = 3, winH = 4;
+                var spacingX = 8 + Math.floor(Math.random() * 3);
+                var spacingY = 10 + Math.floor(Math.random() * 3);
+                var marginX = 6;
+                var marginY = 8;
+
+                for (var wy = topY + marginY; wy < H - spacingY; wy += spacingY) {
+                    for (var wx = bx + marginX; wx < bx + bw - marginX - winW; wx += spacingX) {
+                        var lit = Math.random() < 0.4;
+                        var wColor;
+                        if (lit) {
+                            var r = Math.random();
+                            if (r < 0.4) wColor = 'rgba(255,220,100,0.7)';
+                            else if (r < 0.7) wColor = 'rgba(0,255,255,0.4)';
+                            else wColor = 'rgba(255,255,230,0.6)';
+                        } else {
+                            wColor = 'rgba(20,20,40,0.5)';
+                        }
+                        wins.push({ x: wx, y: wy, lit: lit, color: wColor });
+                    }
+                }
+
+                // Rooftop details
+                var hasAntenna = Math.random() < 0.3;
+                var antennaH = 10 + Math.random() * 15;
+                var antennaX = bx + bw * (0.3 + Math.random() * 0.4);
+                var hasBox = !hasAntenna && Math.random() < 0.25;
+                var boxW = 8 + Math.random() * 10;
+                var boxH = 4 + Math.random() * 6;
+                var boxX = bx + bw * (0.2 + Math.random() * 0.5);
+
+                buildings.push({
+                    x: bx, w: bw, h: bh,
+                    windows: wins,
+                    hasAntenna: hasAntenna,
+                    antennaH: antennaH,
+                    antennaX: antennaX,
+                    hasBox: hasBox,
+                    boxW: boxW,
+                    boxH: boxH,
+                    boxX: boxX
+                });
+
+                // Neon tubes on some buildings
                 if (Math.random() > 0.35) {
                     var colors = ['#00ffff', '#ff00ff', '#ffff00', '#39ff14'];
                     var color = colors[Math.floor(Math.random() * colors.length)];
-                    var tubeY = H - bh + 10 + Math.random() * (bh * 0.4);
+                    var tubeY = topY + 10 + Math.random() * (bh * 0.4);
                     var tubeW = bw * (0.3 + Math.random() * 0.4);
-                    var tubeX = x + (bw - tubeW) / 2;
+                    var tubeX = bx + (bw - tubeW) / 2;
                     neonTubes.push({
                         x: tubeX, y: tubeY, w: tubeW,
                         color: color,
@@ -76,7 +183,42 @@
                         flickering: false
                     });
                 }
-                x += bw + 2;
+
+                // Neon rectangle signs on some buildings
+                if (Math.random() > 0.55) {
+                    var signColors = ['#00ffff', '#ff00ff', '#ffff00', '#39ff14'];
+                    var signColor = signColors[Math.floor(Math.random() * signColors.length)];
+                    var signW = bw * (0.2 + Math.random() * 0.25);
+                    var signH = 6 + Math.random() * 10;
+                    var signX = bx + (bw - signW) * Math.random();
+                    var signY = topY + bh * (0.15 + Math.random() * 0.5);
+                    neonTubes.push({
+                        x: signX, y: signY, w: signW, h: signH,
+                        isRect: true,
+                        color: signColor,
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.015 + Math.random() * 0.025,
+                        drawProgress: 0,
+                        drawSpeed: 0.008 + Math.random() * 0.012,
+                        drawn: false,
+                        flickerTimer: 0,
+                        flickering: false
+                    });
+                }
+
+                bx += bw + 1 + Math.floor(Math.random() * 3);
+            }
+
+            // --- Monorail Pillars & Stations ---
+            var pillarSpacing = Math.max(100, W * 0.09);
+            var stationInterval = Math.floor(3 + Math.random() * 3); // station every N pillars
+            for (var pIdx = 0, px = pillarSpacing * 0.5; px < W + pillarSpacing; px += pillarSpacing, pIdx++) {
+                var isStation = (pIdx % stationInterval === 0);
+                pillars.push({
+                    x: px,
+                    isStation: isStation,
+                    lightPhase: Math.random() * Math.PI * 2
+                });
             }
         }
 
@@ -84,17 +226,23 @@
 
         function draw() {
             time++;
-            ctx.fillStyle = '#050510';
+
+            // === 1. Sky Gradient (3-stop) ===
+            var skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+            skyGrad.addColorStop(0, '#050510');
+            skyGrad.addColorStop(0.5, '#120a2e');
+            skyGrad.addColorStop(1, '#0a0a1a');
+            ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, W, H);
 
-            // Gradient sky
-            var grad = ctx.createLinearGradient(0, 0, 0, H * 0.6);
-            grad.addColorStop(0, '#050510');
-            grad.addColorStop(1, '#0a0a2e');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H * 0.6);
+            // Subtle purple atmospheric glow in upper area
+            var glowGrad = ctx.createRadialGradient(W * 0.7, H * 0.12, 0, W * 0.7, H * 0.12, H * 0.3);
+            glowGrad.addColorStop(0, 'rgba(80,20,120,0.08)');
+            glowGrad.addColorStop(1, 'rgba(80,20,120,0)');
+            ctx.fillStyle = glowGrad;
+            ctx.fillRect(0, 0, W, H * 0.4);
 
-            // Stars
+            // === 2. Stars ===
             for (var i = 0; i < stars.length; i++) {
                 var s = stars[i];
                 var alpha = s.a + Math.sin(time * s.twinkleSpeed) * 0.2;
@@ -104,17 +252,109 @@
                 ctx.fill();
             }
 
-            // Buildings
-            for (var j = 0; j < buildings.length; j++) {
-                var b = buildings[j];
-                ctx.fillStyle = '#08081a';
-                ctx.fillRect(b.x, H - b.h, b.w, b.h);
-                ctx.strokeStyle = 'rgba(0,255,255,0.1)';
+            // === 3. Mountains (3 layers, back to front) ===
+            for (var ml = 0; ml < mountainLayers.length; ml++) {
+                var layer = mountainLayers[ml];
+                var pts = layer.points;
+
+                // Fill mountain shape
+                ctx.beginPath();
+                ctx.moveTo(0, H);
+                for (var mp = 0; mp < pts.length; mp++) {
+                    ctx.lineTo(pts[mp].x, pts[mp].y);
+                }
+                ctx.lineTo(W, H);
+                ctx.closePath();
+                ctx.fillStyle = layer.color;
+                ctx.fill();
+
+                // Glowing ridge line
+                var glowPulse = 0.7 + Math.sin(time * 0.008 + ml) * 0.3;
+                ctx.beginPath();
+                for (var mr = 0; mr < pts.length; mr++) {
+                    if (mr === 0) ctx.moveTo(pts[mr].x, pts[mr].y);
+                    else ctx.lineTo(pts[mr].x, pts[mr].y);
+                }
+                ctx.strokeStyle = layer.glowColor;
                 ctx.lineWidth = 1;
-                ctx.strokeRect(b.x, H - b.h, b.w, 1);
+                ctx.globalAlpha = glowPulse;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
             }
 
-            // Neon tubes
+            // === 4. Far Buildings (dark silhouettes behind main city) ===
+            for (var fi = 0; fi < farBuildings.length; fi++) {
+                var fb = farBuildings[fi];
+                ctx.fillStyle = '#060614';
+                ctx.fillRect(fb.x, H - fb.h - H * 0.05, fb.w, fb.h);
+                // Subtle cyan top edge
+                ctx.fillStyle = 'rgba(0,255,255,0.06)';
+                ctx.fillRect(fb.x, H - fb.h - H * 0.05, fb.w, 1);
+            }
+
+            // === 5. Main Buildings ===
+            for (var j = 0; j < buildings.length; j++) {
+                var b = buildings[j];
+                var topY = H - b.h;
+
+                // Building body with slight variation
+                ctx.fillStyle = j % 2 === 0 ? '#08081a' : '#0c0c24';
+                ctx.fillRect(b.x, topY, b.w, b.h);
+
+                // Top edge highlight
+                ctx.fillStyle = 'rgba(0,255,255,0.1)';
+                ctx.fillRect(b.x, topY, b.w, 1);
+
+                // Side edge highlight (left)
+                ctx.fillStyle = 'rgba(0,255,255,0.03)';
+                ctx.fillRect(b.x, topY, 1, b.h);
+
+                // Windows
+                var wins = b.windows;
+                for (var wi = 0; wi < wins.length; wi++) {
+                    var win = wins[wi];
+                    ctx.fillStyle = win.color;
+                    ctx.fillRect(win.x, win.y, 3, 4);
+                    // Subtle glow for lit windows
+                    if (win.lit) {
+                        ctx.fillStyle = win.color.replace(/[\d.]+\)$/, '0.15)');
+                        ctx.fillRect(win.x - 1, win.y - 1, 5, 6);
+                    }
+                }
+
+                // Rooftop antenna
+                if (b.hasAntenna) {
+                    ctx.strokeStyle = '#1a1a3e';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(b.antennaX, topY);
+                    ctx.lineTo(b.antennaX, topY - b.antennaH);
+                    ctx.stroke();
+
+                    // Blinking red light at top
+                    var blink = Math.sin(time * 0.05 + j) > 0.3;
+                    if (blink) {
+                        ctx.beginPath();
+                        ctx.arc(b.antennaX, topY - b.antennaH, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ff2020';
+                        ctx.fill();
+                        ctx.shadowColor = '#ff2020';
+                        ctx.shadowBlur = 4;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                }
+
+                // Rooftop AC unit box
+                if (b.hasBox) {
+                    ctx.fillStyle = '#0e0e22';
+                    ctx.fillRect(b.boxX, topY - b.boxH, b.boxW, b.boxH);
+                    ctx.fillStyle = 'rgba(0,255,255,0.05)';
+                    ctx.fillRect(b.boxX, topY - b.boxH, b.boxW, 1);
+                }
+            }
+
+            // === 6. Neon Tubes & Signs ===
             for (var k = 0; k < neonTubes.length; k++) {
                 var t = neonTubes[k];
 
@@ -136,22 +376,492 @@
 
                 var flicker = t.flickering && (t.flickerTimer % 3 === 0);
                 var pulse = 0.6 + Math.sin(time * t.speed + t.phase) * 0.4;
-                var currentW = t.w * t.drawProgress;
 
                 if (!flicker) {
-                    // Glow
-                    ctx.shadowColor = t.color;
-                    ctx.shadowBlur = 12 * pulse;
-                    ctx.strokeStyle = t.color;
-                    ctx.globalAlpha = pulse * 0.9;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(t.x, t.y);
-                    ctx.lineTo(t.x + currentW, t.y);
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
-                    ctx.globalAlpha = 1;
+                    if (t.isRect) {
+                        // Neon rectangle sign
+                        var currentW = t.w * t.drawProgress;
+                        var currentH = t.h * t.drawProgress;
+                        ctx.shadowColor = t.color;
+                        ctx.shadowBlur = 8 * pulse;
+                        ctx.globalAlpha = pulse * 0.7;
+                        ctx.fillStyle = t.color;
+                        ctx.fillRect(t.x, t.y, currentW, currentH);
+                        ctx.shadowBlur = 0;
+                        ctx.globalAlpha = 1;
+                    } else {
+                        // Neon tube line
+                        var currentW2 = t.w * t.drawProgress;
+                        ctx.shadowColor = t.color;
+                        ctx.shadowBlur = 12 * pulse;
+                        ctx.strokeStyle = t.color;
+                        ctx.globalAlpha = pulse * 0.9;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(t.x, t.y);
+                        ctx.lineTo(t.x + currentW2, t.y);
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                        ctx.globalAlpha = 1;
+                    }
                 }
+            }
+
+            // === 7. Monorail Track & Pillars ===
+            var railTop = trackY;
+            var railBot = trackY + trackH;
+            var pillarW = Math.max(8, trackH * 1.2);
+            var braceW = pillarW * 2.5;
+
+            // Support pillars (behind track)
+            for (var pi = 0; pi < pillars.length; pi++) {
+                var pil = pillars[pi];
+                var plx = pil.x - pillarW / 2;
+
+                // Main vertical column
+                ctx.fillStyle = '#10102a';
+                ctx.fillRect(plx, railBot, pillarW, H - railBot);
+
+                // Column edge highlights (left and right)
+                ctx.fillStyle = 'rgba(0,255,255,0.05)';
+                ctx.fillRect(plx, railBot, 1, H - railBot);
+                ctx.fillRect(plx + pillarW - 1, railBot, 1, H - railBot);
+
+                // Angled braces (diagonal supports)
+                ctx.strokeStyle = '#0e0e26';
+                ctx.lineWidth = Math.max(2, pillarW * 0.35);
+                // Left brace
+                ctx.beginPath();
+                ctx.moveTo(pil.x, railBot + trackH);
+                ctx.lineTo(pil.x - braceW, railBot + braceW * 1.5);
+                ctx.stroke();
+                // Right brace
+                ctx.beginPath();
+                ctx.moveTo(pil.x, railBot + trackH);
+                ctx.lineTo(pil.x + braceW, railBot + braceW * 1.5);
+                ctx.stroke();
+
+                // Brace edge glow
+                ctx.strokeStyle = 'rgba(0,255,255,0.04)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(pil.x, railBot + trackH);
+                ctx.lineTo(pil.x - braceW, railBot + braceW * 1.5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pil.x, railBot + trackH);
+                ctx.lineTo(pil.x + braceW, railBot + braceW * 1.5);
+                ctx.stroke();
+
+                // Capital (wider top piece connecting pillar to beam)
+                var capH = Math.max(3, trackH * 0.6);
+                var capW = pillarW * 1.6;
+                ctx.fillStyle = '#14142e';
+                ctx.fillRect(pil.x - capW / 2, railBot - 1, capW, capH + 1);
+                ctx.fillStyle = 'rgba(0,255,255,0.06)';
+                ctx.fillRect(pil.x - capW / 2, railBot - 1, capW, 1);
+
+                // Warning light on pillar (alternating blink)
+                var warnBlink = Math.sin(time * 0.04 + pil.lightPhase) > 0.6;
+                if (warnBlink) {
+                    ctx.beginPath();
+                    ctx.arc(pil.x, railBot + trackH * 2.5, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,80,0,0.8)';
+                    ctx.shadowColor = '#ff5500';
+                    ctx.shadowBlur = 6;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                // Station platform at some pillars
+                if (pil.isStation) {
+                    var platW = pillarW * 8;
+                    var platH = Math.max(4, trackH * 0.7);
+                    var platX = pil.x - platW / 2;
+                    var platY = railBot + trackH * 0.3;
+
+                    // Platform slab
+                    ctx.fillStyle = '#16163a';
+                    ctx.fillRect(platX, platY, platW, platH);
+                    // Platform top edge neon
+                    ctx.fillStyle = 'rgba(255,0,255,0.2)';
+                    ctx.fillRect(platX, platY, platW, 1);
+                    // Platform bottom edge
+                    ctx.fillStyle = 'rgba(0,255,255,0.08)';
+                    ctx.fillRect(platX, platY + platH, platW, 1);
+
+                    // Shelter / canopy
+                    var shelterW = platW * 0.5;
+                    var shelterH = Math.max(10, train.carHeight * 0.7);
+                    var shelterX = pil.x - shelterW / 2;
+                    var shelterY = railTop - train.carHeight - shelterH - 2;
+
+                    // Shelter uprights
+                    ctx.fillStyle = '#12122e';
+                    ctx.fillRect(shelterX, shelterY, 2, shelterH);
+                    ctx.fillRect(shelterX + shelterW - 2, shelterY, 2, shelterH);
+
+                    // Shelter roof
+                    ctx.fillStyle = '#14143a';
+                    ctx.fillRect(shelterX - 4, shelterY - 3, shelterW + 8, 3);
+                    // Roof neon strip
+                    ctx.fillStyle = 'rgba(0,255,255,0.15)';
+                    ctx.fillRect(shelterX - 4, shelterY - 3, shelterW + 8, 1);
+
+                    // Station sign (glowing rectangle)
+                    var signPulse = 0.6 + Math.sin(time * 0.02 + pi) * 0.4;
+                    ctx.fillStyle = 'rgba(255,0,255,' + (0.3 * signPulse) + ')';
+                    ctx.shadowColor = '#ff00ff';
+                    ctx.shadowBlur = 4 * signPulse;
+                    ctx.fillRect(pil.x - 12, shelterY + 2, 24, 6);
+                    ctx.shadowBlur = 0;
+
+                    // Waiting area lights (under shelter)
+                    ctx.fillStyle = 'rgba(255,245,200,0.06)';
+                    ctx.fillRect(shelterX, shelterY + shelterH - 1, shelterW, train.carHeight + 4);
+                }
+            }
+
+            // Dual rail beams
+            var railGap = trackH * 0.3;
+            // Lower rail (main structural beam)
+            ctx.fillStyle = '#1a1a32';
+            ctx.fillRect(0, railTop, W, trackH);
+            // Upper rail (guide rail, slightly thinner)
+            ctx.fillStyle = '#18182e';
+            ctx.fillRect(0, railTop - trackH * 0.5 - railGap, W, trackH * 0.5);
+
+            // Rail edge highlights
+            ctx.fillStyle = 'rgba(0,255,255,0.15)';
+            ctx.fillRect(0, railTop, W, 1); // main rail top
+            ctx.fillStyle = 'rgba(0,255,255,0.08)';
+            ctx.fillRect(0, railTop - trackH * 0.5 - railGap, W, 1); // guide rail top
+            // Bottom edge of main rail
+            ctx.fillStyle = 'rgba(80,60,200,0.06)';
+            ctx.fillRect(0, railBot - 1, W, 1);
+
+            // Rail running lights (small dots along the track edge, spaced regularly)
+            for (var rl = 0; rl < W; rl += 40) {
+                var rlAlpha = 0.08 + Math.sin(time * 0.03 + rl * 0.01) * 0.04;
+                ctx.fillStyle = 'rgba(0,255,255,' + rlAlpha + ')';
+                ctx.fillRect(rl, railTop + 1, 2, 2);
+            }
+
+            // === 8. Monorail Train (animated, multi-car) ===
+            train.x += train.speed;
+            if (train.x > W + 100) {
+                train.x = -train.totalWidth - 100;
+            }
+
+            var cw = train.carWidth;
+            var ch = train.carHeight;
+            var ty = railTop - ch + 1; // sits on top of main rail
+            var noseLen = Math.max(10, cw * 0.12);
+
+            // Per-car rendering
+            for (var ci = 0; ci < train.cars; ci++) {
+                var cx = train.x + ci * (cw + train.gapWidth);
+                var isFirst = (ci === 0);
+                var isLast = (ci === train.cars - 1);
+
+                // --- Undercarriage glow (cast onto track) ---
+                ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 18;
+                ctx.fillStyle = 'rgba(0,255,255,0.04)';
+                ctx.fillRect(cx + 8, railBot + 1, cw - 16, 10);
+                ctx.shadowBlur = 0;
+
+                // --- Bogies / trucks (under the car) ---
+                var bogieW = cw * 0.14;
+                var bogieH = Math.max(3, ch * 0.15);
+                ctx.fillStyle = '#0a0a22';
+                // Front bogie
+                ctx.fillRect(cx + cw * 0.15, ty + ch, bogieW, bogieH);
+                // Rear bogie
+                ctx.fillRect(cx + cw * 0.7, ty + ch, bogieW, bogieH);
+                // Bogie highlight
+                ctx.fillStyle = 'rgba(0,255,255,0.06)';
+                ctx.fillRect(cx + cw * 0.15, ty + ch, bogieW, 1);
+                ctx.fillRect(cx + cw * 0.7, ty + ch, bogieW, 1);
+
+                // --- Main car body ---
+                ctx.fillStyle = '#0c0c26';
+                ctx.fillRect(cx, ty, cw, ch);
+
+                // Darker lower panel
+                ctx.fillStyle = '#0a0a20';
+                ctx.fillRect(cx, ty + ch * 0.7, cw, ch * 0.3);
+
+                // Panel line (horizontal seam)
+                ctx.fillStyle = 'rgba(60,60,120,0.15)';
+                ctx.fillRect(cx, ty + ch * 0.7, cw, 1);
+
+                // Body top edge highlight
+                ctx.fillStyle = 'rgba(100,140,255,0.1)';
+                ctx.fillRect(cx, ty, cw, 1);
+
+                // Body bottom edge
+                ctx.fillStyle = 'rgba(0,255,255,0.06)';
+                ctx.fillRect(cx, ty + ch - 1, cw, 1);
+
+                // --- Aerodynamic nose (front car only) ---
+                if (isFirst) {
+                    // Tapered nose on the leading end (left side since train came from left)
+                    // Actually the train moves right, so the "front" is the right side of the last car
+                }
+                // Leading nose on the LAST car (rightmost, direction of travel)
+                if (isLast) {
+                    ctx.fillStyle = '#0c0c26';
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cw, ty);
+                    ctx.lineTo(cx + cw + noseLen, ty + ch * 0.25);
+                    ctx.lineTo(cx + cw + noseLen, ty + ch * 0.75);
+                    ctx.lineTo(cx + cw, ty + ch);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Nose lower panel
+                    ctx.fillStyle = '#0a0a20';
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cw, ty + ch * 0.7);
+                    ctx.lineTo(cx + cw + noseLen, ty + ch * 0.725);
+                    ctx.lineTo(cx + cw + noseLen, ty + ch * 0.75);
+                    ctx.lineTo(cx + cw, ty + ch);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Nose top edge highlight
+                    ctx.strokeStyle = 'rgba(100,140,255,0.1)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cw, ty);
+                    ctx.lineTo(cx + cw + noseLen, ty + ch * 0.25);
+                    ctx.stroke();
+                }
+
+                // Trailing tail on the FIRST car (leftmost)
+                if (isFirst) {
+                    ctx.fillStyle = '#0c0c26';
+                    ctx.beginPath();
+                    ctx.moveTo(cx, ty);
+                    ctx.lineTo(cx - noseLen * 0.7, ty + ch * 0.3);
+                    ctx.lineTo(cx - noseLen * 0.7, ty + ch * 0.7);
+                    ctx.lineTo(cx, ty + ch);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Tail lower panel
+                    ctx.fillStyle = '#0a0a20';
+                    ctx.beginPath();
+                    ctx.moveTo(cx, ty + ch * 0.7);
+                    ctx.lineTo(cx - noseLen * 0.7, ty + ch * 0.7);
+                    ctx.lineTo(cx, ty + ch);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // --- Neon accent stripes (2 stripes: cyan top, magenta bottom) ---
+                var stripeY1 = ty + ch * 0.32;
+                var stripeY2 = ty + ch * 0.68;
+                var stripeExtL = isFirst ? cx - noseLen * 0.5 : cx;
+                var stripeExtR = isLast ? cx + cw + noseLen * 0.8 : cx + cw;
+
+                ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 5;
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(stripeExtL, stripeY1, stripeExtR - stripeExtL, 2);
+                ctx.shadowBlur = 0;
+
+                ctx.shadowColor = '#ff00ff';
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = 'rgba(255,0,255,0.6)';
+                ctx.fillRect(stripeExtL, stripeY2, stripeExtR - stripeExtL, 1);
+                ctx.shadowBlur = 0;
+
+                // --- Windows ---
+                var winMargin = cw * 0.08;
+                var winSpacing = Math.max(10, cw * 0.085);
+                var winW = Math.max(5, cw * 0.055);
+                var winH = ch * 0.35;
+                var winY = ty + ch * 0.12;
+
+                // Larger driver window on first & last car
+                if (isLast) {
+                    // Front driver panoramic window
+                    var drvW = winW * 1.8;
+                    var drvX = cx + cw - winMargin - drvW;
+                    ctx.fillStyle = 'rgba(180,230,255,0.5)';
+                    ctx.fillRect(drvX, winY, drvW, winH * 1.1);
+                    ctx.fillStyle = 'rgba(180,230,255,0.12)';
+                    ctx.fillRect(drvX - 1, winY - 1, drvW + 2, winH * 1.1 + 2);
+                }
+                if (isFirst) {
+                    var drvW2 = winW * 1.5;
+                    var drvX2 = cx + winMargin;
+                    ctx.fillStyle = 'rgba(180,230,255,0.35)';
+                    ctx.fillRect(drvX2, winY, drvW2, winH * 1.1);
+                    ctx.fillStyle = 'rgba(180,230,255,0.08)';
+                    ctx.fillRect(drvX2 - 1, winY - 1, drvW2 + 2, winH * 1.1 + 2);
+                }
+
+                // Passenger windows
+                var pWinStart = cx + winMargin + (isFirst ? winW * 2 : 0);
+                var pWinEnd = cx + cw - winMargin - (isLast ? winW * 2.5 : 0);
+                for (var pw = pWinStart; pw + winW < pWinEnd; pw += winSpacing) {
+                    // Window frame (dark)
+                    ctx.fillStyle = 'rgba(8,8,30,0.8)';
+                    ctx.fillRect(pw - 1, winY - 1, winW + 2, winH + 2);
+                    // Window glass (warm interior glow)
+                    var wFlicker = 0.55 + Math.sin(time * 0.015 + pw * 0.1 + ci) * 0.15;
+                    ctx.fillStyle = 'rgba(255,245,200,' + wFlicker + ')';
+                    ctx.fillRect(pw, winY, winW, winH);
+                    // Outer glow
+                    ctx.fillStyle = 'rgba(255,245,200,0.08)';
+                    ctx.fillRect(pw - 2, winY - 2, winW + 4, winH + 4);
+                }
+
+                // --- Roof detail ---
+                // Roof ridge
+                ctx.fillStyle = '#101030';
+                ctx.fillRect(cx + cw * 0.1, ty - 2, cw * 0.8, 2);
+                // Pantograph / power collector (on middle car)
+                if (ci === 1 || (train.cars === 1 && ci === 0)) {
+                    var pantoX = cx + cw * 0.45;
+                    var pantoH = Math.max(6, ch * 0.3);
+                    // Base
+                    ctx.fillStyle = '#0e0e28';
+                    ctx.fillRect(pantoX - 4, ty - 3, 8, 3);
+                    // Arm (V shape)
+                    ctx.strokeStyle = '#1a1a40';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(pantoX - 3, ty - 3);
+                    ctx.lineTo(pantoX, ty - 3 - pantoH);
+                    ctx.lineTo(pantoX + 3, ty - 3);
+                    ctx.stroke();
+                    // Collector bar at top
+                    ctx.fillStyle = '#2a2a50';
+                    ctx.fillRect(pantoX - 6, ty - 3 - pantoH - 1, 12, 2);
+                    // Spark effect (occasional)
+                    if (Math.sin(time * 0.1 + ci * 2) > 0.85) {
+                        ctx.fillStyle = 'rgba(100,200,255,0.8)';
+                        ctx.shadowColor = '#00ccff';
+                        ctx.shadowBlur = 8;
+                        ctx.fillRect(pantoX - 1, ty - 3 - pantoH - 2, 2, 2);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+
+                // --- Running lights along bottom of car ---
+                ctx.fillStyle = 'rgba(0,255,255,0.12)';
+                for (var rli = cx + 12; rli < cx + cw - 12; rli += 20) {
+                    ctx.fillRect(rli, ty + ch - 2, 3, 1);
+                }
+
+                // --- Car connection joints (between cars) ---
+                if (!isLast) {
+                    var jx = cx + cw;
+                    var jy = ty + ch * 0.15;
+                    var jh = ch * 0.7;
+                    // Accordion connector
+                    ctx.fillStyle = '#080818';
+                    ctx.fillRect(jx, jy, train.gapWidth, jh);
+                    // Connector ridges
+                    ctx.fillStyle = 'rgba(40,40,80,0.3)';
+                    ctx.fillRect(jx + 1, jy, 1, jh);
+                    ctx.fillRect(jx + train.gapWidth - 2, jy, 1, jh);
+                    // Stripe continuity through joint
+                    ctx.fillStyle = 'rgba(0,255,255,0.3)';
+                    ctx.fillRect(jx, stripeY1, train.gapWidth, 1);
+                }
+            }
+
+            // --- Front headlight (on leading car nose) ---
+            var leadX = train.x + train.totalWidth + noseLen;
+            var leadY = ty;
+
+            // Headlight beam cone
+            ctx.globalAlpha = 0.03;
+            ctx.fillStyle = '#aaffff';
+            ctx.beginPath();
+            ctx.moveTo(leadX, leadY + ch * 0.3);
+            ctx.lineTo(leadX + W * 0.12, leadY - ch * 0.5);
+            ctx.lineTo(leadX + W * 0.12, leadY + ch * 1.5);
+            ctx.lineTo(leadX, leadY + ch * 0.7);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Headlight (bright point)
+            ctx.shadowColor = '#aaffff';
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = 'rgba(200,255,255,0.95)';
+            ctx.fillRect(leadX - 2, leadY + ch * 0.3, 4, ch * 0.4);
+            ctx.shadowBlur = 0;
+
+            // Secondary lower headlights
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 6;
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillRect(leadX - 1, leadY + ch * 0.55, 2, 3);
+            ctx.fillRect(leadX - 1, leadY + ch * 0.35, 2, 3);
+            ctx.shadowBlur = 0;
+
+            // --- Rear tail lights (on trailing car) ---
+            var tailX = train.x - noseLen * 0.7;
+
+            // Main tail light (red)
+            ctx.fillStyle = '#ff2020';
+            ctx.shadowColor = '#ff2020';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(tailX - 1, ty + ch * 0.3, 3, ch * 0.15);
+            ctx.fillRect(tailX - 1, ty + ch * 0.55, 3, ch * 0.15);
+            ctx.shadowBlur = 0;
+
+            // Tail glow
+            ctx.globalAlpha = 0.04;
+            ctx.fillStyle = '#ff2020';
+            ctx.beginPath();
+            ctx.moveTo(tailX, ty + ch * 0.3);
+            ctx.lineTo(tailX - W * 0.04, ty + ch * 0.1);
+            ctx.lineTo(tailX - W * 0.04, ty + ch * 0.9);
+            ctx.lineTo(tailX, ty + ch * 0.7);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // --- Destination sign (front car, above windshield) ---
+            var destCx = train.x + train.totalWidth - train.carWidth;
+            var destPulse = 0.7 + Math.sin(time * 0.025) * 0.3;
+            ctx.fillStyle = 'rgba(255,140,0,' + (0.5 * destPulse) + ')';
+            ctx.shadowColor = '#ff8800';
+            ctx.shadowBlur = 3;
+            ctx.fillRect(destCx + train.carWidth * 0.55, ty + 2, train.carWidth * 0.3, 4);
+            ctx.shadowBlur = 0;
+
+            // === 9. Ground Reflections (bottom 5%) ===
+            var reflectTop = H * 0.95;
+            var reflGrad = ctx.createLinearGradient(0, reflectTop, 0, H);
+            reflGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            reflGrad.addColorStop(1, 'rgba(10,5,30,0.4)');
+            ctx.fillStyle = reflGrad;
+            ctx.fillRect(0, reflectTop, W, H - reflectTop);
+
+            // Faint neon reflection streaks from buildings
+            ctx.globalAlpha = 0.04;
+            for (var ri = 0; ri < neonTubes.length; ri += 3) {
+                var nt = neonTubes[ri];
+                ctx.fillStyle = nt.color;
+                ctx.fillRect(nt.x + nt.w * 0.3, reflectTop, 2, H - reflectTop);
+            }
+            ctx.globalAlpha = 1;
+
+            // Train reflection on wet ground
+            if (train.x > -train.totalWidth && train.x < W + 200) {
+                ctx.globalAlpha = 0.03;
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(train.x, reflectTop, train.totalWidth, H - reflectTop);
+                ctx.globalAlpha = 1;
             }
 
             requestAnimationFrame(draw);
