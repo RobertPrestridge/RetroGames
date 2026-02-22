@@ -17,6 +17,7 @@ public class PlayerInput
     public bool RotateLeft { get; set; }
     public bool RotateRight { get; set; }
     public bool Fire { get; set; }
+    public bool Nuke { get; set; }
 }
 
 public class ExplosionEvent
@@ -40,6 +41,8 @@ public class AsteroidTickResult
     public int P2Lives { get; set; }
     public int Wave { get; set; }
     public int? Status { get; set; }
+    public int P1Nukes { get; set; }
+    public int P2Nukes { get; set; }
 }
 
 public class ShipState
@@ -203,6 +206,10 @@ public class AsteroidGame
             // Move asteroids
             MoveAsteroids();
 
+            // Check nuke activation
+            CheckNuke(Player1, _p1Input, explosions);
+            CheckNuke(Player2, _p2Input, explosions);
+
             // Check bullet-asteroid collisions
             CheckBulletAsteroidCollisions(explosions);
 
@@ -222,6 +229,12 @@ public class AsteroidGame
                 if (_wavePauseRemaining <= 0 && Asteroids.Count == 0)
                 {
                     Wave++;
+                    // Award a nuke every 3 waves
+                    if (Wave % 3 == 1 && Wave > 1)
+                    {
+                        Player1.NukesRemaining++;
+                        Player2.NukesRemaining++;
+                    }
                     SpawnWave();
                 }
             }
@@ -248,7 +261,9 @@ public class AsteroidGame
                 P1Lives = Player1.Lives,
                 P2Lives = Player2.Lives,
                 Wave = Wave,
-                Status = statusChange
+                Status = statusChange,
+                P1Nukes = Player1.NukesRemaining,
+                P2Nukes = Player2.NukesRemaining
             };
         }
     }
@@ -299,6 +314,10 @@ public class AsteroidGame
 
         if (ship.InvulnerableTicks > 0)
             ship.InvulnerableTicks--;
+
+        // Reset nuke latch when key released
+        if (!input.Nuke)
+            ship.NukeFired = false;
     }
 
     private void MoveShip(Ship ship)
@@ -422,6 +441,35 @@ public class AsteroidGame
         }
     }
 
+    private void CheckNuke(Ship ship, PlayerInput input, List<ExplosionEvent> explosions)
+    {
+        if (!ship.Alive || !input.Nuke || ship.NukeFired) return;
+
+        ship.NukeFired = true;
+
+        if (ship.NukesRemaining <= 0) return;
+
+        ship.NukesRemaining--;
+
+        // Award points for all destroyed asteroids
+        foreach (var asteroid in Asteroids)
+        {
+            ship.Score += asteroid.Points;
+        }
+
+        // Create nuke explosion at ship position
+        explosions.Add(new ExplosionEvent
+        {
+            X = ship.X,
+            Y = ship.Y,
+            Size = "nuke"
+        });
+
+        // Destroy all asteroids
+        Asteroids.Clear();
+        _asteroidsChanged = true;
+    }
+
     private void SplitAsteroid(Asteroid asteroid)
     {
         Asteroids.Remove(asteroid);
@@ -538,7 +586,9 @@ public class AsteroidGame
                 P1Lives = Player1.Lives,
                 P2Lives = Player2?.Lives ?? 0,
                 Wave = Wave,
-                Status = (int)Status
+                Status = (int)Status,
+                P1Nukes = Player1.NukesRemaining,
+                P2Nukes = Player2?.NukesRemaining ?? 0
             };
         }
     }

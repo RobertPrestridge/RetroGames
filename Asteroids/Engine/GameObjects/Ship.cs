@@ -15,6 +15,8 @@ public class Ship
     public int InvulnerableTicks { get; set; }
     public int RespawnTicks { get; set; }
     public string Name { get; set; } = string.Empty;
+    public int NukesRemaining { get; set; } = 1;
+    public bool NukeFired { get; set; }
     public string? ConnectionId { get; set; }
     public string SessionId { get; set; } = string.Empty;
 }

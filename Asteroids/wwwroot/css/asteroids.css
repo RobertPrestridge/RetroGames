@@ -120,6 +120,11 @@
     letter-spacing: 4px;
 }
 
+.asteroids-hud-nukes {
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+}
+
 .asteroids-hud-wave {
     font-size: 0.5rem;
     color: #aaa;
