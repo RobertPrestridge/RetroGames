@@ -1,0 +1,104 @@
+@model PocketTanks.Models.ViewModels.TanksPlayViewModel
+@{
+    ViewData["Title"] = "TANKS " + Model.ShortCode;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/PocketTanks/css/tanks.css" asp-append-version="true" />
+}
+
+<div class="tanks-game-container">
+    <div class="tanks-hud">
+        <div class="tanks-hud-left">
+            <span id="p1Name" class="tanks-hud-name tanks-p1-color">---</span>
+            <div class="tanks-health-bar-wrapper">
+                <div id="p1HealthBar" class="tanks-health-bar" style="width:100%"></div>
+            </div>
+            <span id="p1Health" class="tanks-hud-health">100</span>
+            <span id="p1Score" class="tanks-hud-score">SCORE: 0</span>
+        </div>
+        <div class="tanks-hud-center">
+            <span id="gameStatus" class="tanks-hud-status">CONNECTING...</span>
+            <span id="turnInfo" class="tanks-hud-turn"></span>
+            <span id="timerDisplay" class="tanks-hud-timer"></span>
+        </div>
+        <div class="tanks-hud-right">
+            <span id="p2Name" class="tanks-hud-name tanks-p2-color">---</span>
+            <div class="tanks-health-bar-wrapper">
+                <div id="p2HealthBar" class="tanks-health-bar" style="width:100%"></div>
+            </div>
+            <span id="p2Health" class="tanks-hud-health">100</span>
+            <span id="p2Score" class="tanks-hud-score">SCORE: 0</span>
+        </div>
+    </div>
+
+    <div class="tanks-canvas-wrapper">
+        <canvas id="tanksCanvas"></canvas>
+
+        <div id="waitingOverlay" class="tanks-overlay tanks-waiting-overlay" style="display:none;">
+            <div class="tanks-waiting-text">WAITING FOR OPPONENT...</div>
+            <div class="tanks-share-box mt-3">
+                <p>SEND THIS LINK:</p>
+                <div class="tanks-share-input-group">
+                    <input type="text" id="shareLink" class="form-control tanks-input" readonly />
+                    <button id="copyBtn" class="btn-retro" type="button">COPY</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="countdownOverlay" class="tanks-overlay tanks-countdown-overlay" style="display:none;">
+            <span id="countdownText" class="tanks-countdown-text"></span>
+        </div>
+
+        <div id="weaponSelectOverlay" class="tanks-overlay tanks-weapon-overlay" style="display:none;">
+            <div class="tanks-weapon-title">SELECT WEAPON</div>
+            <div id="weaponGrid" class="tanks-weapon-grid"></div>
+        </div>
+
+        <div id="gameOverOverlay" class="tanks-overlay tanks-gameover-overlay" style="display:none;">
+            <div class="tanks-gameover-text" id="gameOverText"></div>
+            <div class="tanks-gameover-scores" id="gameOverScores"></div>
+            <button id="newGameBtn" class="btn-arcade tanks-btn mt-4">NEW GAME</button>
+        </div>
+    </div>
+
+    <div class="tanks-controls">
+        <div class="tanks-controls-row">
+            <div class="tanks-control-group">
+                <label class="tanks-control-label">ANGLE</label>
+                <div class="tanks-control-value" id="angleDisplay">45</div>
+                <input type="range" id="angleSlider" class="tanks-slider" min="0" max="180" value="45" />
+            </div>
+            <div class="tanks-control-group">
+                <label class="tanks-control-label">POWER</label>
+                <div class="tanks-control-value" id="powerDisplay">50</div>
+                <input type="range" id="powerSlider" class="tanks-slider tanks-slider-power" min="1" max="100" value="50" />
+            </div>
+            <div class="tanks-control-group">
+                <button id="fireBtn" class="tanks-fire-btn" disabled>FIRE</button>
+            </div>
+        </div>
+        <div class="tanks-weapon-info">
+            <span id="currentWeaponName" class="tanks-current-weapon">NO WEAPON</span>
+            <button id="changeWeaponBtn" class="tanks-change-btn" style="display:none;">CHANGE</button>
+        </div>
+    </div>
+
+    <div class="tanks-controls-hint">
+        <span>W/S or UP/DOWN: ANGLE | A/D or LEFT/RIGHT: POWER | SPACE: FIRE | 1-0: WEAPONS</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        window.tanksConfig = {
+            shortCode: '@Model.ShortCode',
+            sessionId: '@Model.SessionId',
+            playerName: '@Model.PlayerName',
+            hubUrl: '/hubs/tanks',
+            homePath: '/tanks'
+        };
+    </script>
+    <script src="~/_content/PocketTanks/js/tanks.js" asp-append-version="true"></script>
+}

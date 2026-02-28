@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Pocket Tanks";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/PocketTanks/css/tanks.css" asp-append-version="true" />
+}
+
+<div class="text-center mt-5">
+    <h1 class="retro-title tanks-title">POCKET TANKS</h1>
+    <hr class="retro-divider tanks-divider" />
+    <p class="retro-subtitle mt-4">AIM. FIRE. DESTROY.</p>
+
+    <div class="tanks-lobby mt-5">
+        <div class="tanks-name-input-group">
+            <label class="tanks-label" for="playerName">ENTER YOUR NAME</label>
+            <input type="text" id="playerName" class="form-control tanks-input"
+                   maxlength="20" placeholder="PLAYER 1"
+                   value="@ViewBag.PlayerName" autocomplete="off" />
+        </div>
+        <button id="createGameBtn" class="btn-arcade tanks-btn mt-4">INSERT COIN</button>
+        <button id="vsCpuBtn" class="btn-arcade tanks-btn mt-3" style="background: linear-gradient(180deg, #ff6600 0%, #cc3300 100%);">VS CPU</button>
+    </div>
+
+    <p class="retro-subtitle mt-5" style="font-size: 0.5rem; color: #555;">PRESS BUTTON TO START</p>
+</div>
+
+@section Scripts {
+    <script>
+        async function createGame(vsAi) {
+            var btn = vsAi ? document.getElementById('vsCpuBtn') : document.getElementById('createGameBtn');
+            var nameInput = document.getElementById('playerName');
+            var playerName = nameInput.value.trim() || 'PLAYER 1';
+            var originalText = btn.textContent;
+
+            btn.disabled = true;
+            btn.textContent = 'LOADING...';
+
+            try {
+                var response = await fetch('/api/tanks/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playerName: playerName, vsAi: vsAi })
+                });
+                var data = await response.json();
+                window.location.href = '/tanks/game/' + data.shortCode;
+            } catch (err) {
+                alert('Failed to create game. Please try again.');
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        document.getElementById('createGameBtn').addEventListener('click', function () { createGame(false); });
+        document.getElementById('vsCpuBtn').addEventListener('click', function () { createGame(true); });
+
+        document.getElementById('playerName').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('createGameBtn').click();
+            }
+        });
+    </script>
+}

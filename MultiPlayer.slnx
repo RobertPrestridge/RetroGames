@@ -3,4 +3,5 @@
   <Project Path="TicTacToe/TicTacToe.csproj" />
   <Project Path="LightCycles/LightCycles.csproj" />
   <Project Path="Asteroids/Asteroids.csproj" />
+  <Project Path="PocketTanks/PocketTanks.csproj" />
 </Solution>
