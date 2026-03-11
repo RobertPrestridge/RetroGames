@@ -10,6 +10,7 @@
     <ProjectReference Include="..\TicTacToe\TicTacToe.csproj" />
     <ProjectReference Include="..\LightCycles\LightCycles.csproj" />
     <ProjectReference Include="..\Asteroids\Asteroids.csproj" />
+    <ProjectReference Include="..\VoxelFoliage\VoxelFoliage.csproj" />
   </ItemGroup>
 
   <ItemGroup>

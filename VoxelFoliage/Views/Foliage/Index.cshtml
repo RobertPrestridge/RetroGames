@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "VOXEL FOLIAGE";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/_content/VoxelFoliage/css/foliage.css" asp-append-version="true" />
+}
+
+<div class="foliage-container">
+    <canvas id="foliageCanvas"></canvas>
+
+    <div id="webgpuFallback" class="foliage-fallback" style="display:none;">
+        <div class="foliage-fallback-text">WEBGPU NOT SUPPORTED</div>
+        <p class="foliage-fallback-sub">Your browser does not support WebGPU.<br/>Try Chrome 113+ or Edge 113+.</p>
+        <a href="/" class="btn-arcade mt-4">BACK TO ARCADE</a>
+    </div>
+
+    <div id="foliageControls" class="foliage-controls">
+        <a href="/" class="foliage-back-link">&#9668; ARCADE</a>
+        <div class="foliage-control-group">
+            <button id="spinToggle" class="foliage-btn active" title="Toggle Auto-Spin">SPIN</button>
+            <label class="foliage-slider-label">
+                SPEED
+                <input type="range" id="speedSlider" class="foliage-slider" min="1" max="20" value="5" />
+            </label>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/_content/VoxelFoliage/js/camera.js" asp-append-version="true"></script>
+    <script src="~/_content/VoxelFoliage/js/voxel-geometry.js" asp-append-version="true"></script>
+    <script src="~/_content/VoxelFoliage/js/foliage-generator.js" asp-append-version="true"></script>
+    <script src="~/_content/VoxelFoliage/js/foliage.js" asp-append-version="true"></script>
+}
