@@ -1,0 +1,155 @@
+.foliage-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #0a0a1a;
+}
+
+#foliageCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Fallback */
+.foliage-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+}
+
+.foliage-fallback-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    color: #ff4444;
+    text-shadow: 0 0 15px rgba(255, 68, 68, 0.7);
+    margin-bottom: 1rem;
+}
+
+.foliage-fallback-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.45rem;
+    color: #888;
+    line-height: 2;
+}
+
+/* Controls overlay */
+.foliage-controls {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 1.2rem;
+    right: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.foliage-controls > * {
+    pointer-events: auto;
+}
+
+.foliage-back-link {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    color: var(--neon-cyan, #00ffff);
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    padding: 0.5rem 0.75rem;
+    background: rgba(18, 18, 42, 0.85);
+    border: 2px solid var(--neon-cyan, #00ffff);
+    transition: all 0.2s ease;
+}
+
+.foliage-back-link:hover {
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    text-decoration: none;
+}
+
+.foliage-control-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(18, 18, 42, 0.85);
+    border: 2px solid #88ff44;
+    box-shadow: 0 0 10px rgba(136, 255, 68, 0.2);
+    padding: 0.5rem 1rem;
+}
+
+.foliage-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.4rem;
+    color: #555;
+    background: transparent;
+    border: 2px solid #555;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.foliage-btn.active {
+    color: #88ff44;
+    border-color: #88ff44;
+    text-shadow: 0 0 8px rgba(136, 255, 68, 0.7);
+    box-shadow: 0 0 8px rgba(136, 255, 68, 0.3);
+}
+
+.foliage-btn:hover {
+    color: #fff;
+    border-color: #fff;
+}
+
+.foliage-slider-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.35rem;
+    color: #88ff44;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.foliage-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #333;
+    outline: none;
+    cursor: pointer;
+}
+
+.foliage-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #88ff44;
+    box-shadow: 0 0 6px rgba(136, 255, 68, 0.6);
+    cursor: pointer;
+}
+
+.foliage-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #88ff44;
+    border: none;
+    box-shadow: 0 0 6px rgba(136, 255, 68, 0.6);
+    cursor: pointer;
+}
+
+@media (max-width: 576px) {
+    .foliage-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
